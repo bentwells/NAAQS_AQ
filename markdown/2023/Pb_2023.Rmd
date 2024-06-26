@@ -1,0 +1,381 @@
+---
+title: "Overview of Lead (Pb) Air Quality in the United States"
+date: "`r paste('Updated:',format(Sys.time(), '%B %e, %Y'))`"
+output: pdf_document
+geometry: left=0.5in,right=0.5in,top=0.5in,bottom=0.75in
+params:
+  curr.year: 2023
+  nei.year: 2020
+urlcolor: blue
+---
+
+```{r label="setup-workspace",echo=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(cache=TRUE,echo=FALSE,message=FALSE,warning=FALSE,fig.width=7.5)
+options(stringsAsFactors=FALSE,scipen=10,warn=-1)
+library(data.table); library(knitr); library(kableExtra); library(plyr); library(reshape2); library(trend);
+source("C:/Users/bwells01/Documents/R/piechart.r")
+source("C:/Users/bwells01/Documents/R/draw_boxplots.r")
+source("C:/Users/bwells01/Documents/Census/shape2020/rmapfuns.r")
+pa <- list(projection='albers',parameters=c(33,45),orientation=c(90,0,-100))
+base.dir <- "C:/Users/bwells01/Documents/NAAQS_AQ/"
+```
+
+## 1. Introduction
+
+|     The overall purpose of this document is to maintain an up-to-date graphical summary of air quality information that supports the review of the National Ambient Air Quality Standards (NAAQS) for lead (Pb). In previous reviews of the Pb NAAQS, this type of information has generally been included in atmospheric sections of the Integrated Science Assessment (ISA) and Policy Assessment (PA) for Pb. This stand-alone document will either replace or complement the air quality emissions and monitoring data in the atmospheric sections of future Pb NAAQS review supporting documents and will be updated at regular intervals as new data becomes available.
+
+|      The content of past NAAQS documents’ atmospheric sections has included major sections on emissions and concentration trends utilizing maps and data from the Environmental Protection Agency's (EPA’s) National Emissions Inventory (NEI) and the EPA's Air Quality System (AQS) database. In past NAAQS reviews, this often involved adaptation of figures and tables prepared for other reports or development of new figures and tables using data analysis and mapping software. Additionally, the release of updated emission inventories and ambient air monitoring data may not coincide with the schedule for the development of NAAQS review supporting documents. As a result, data access and resources can limit the availability of the most recent information for inclusion in NAAQS review supporting documents.
+
+|      This stand-alone document allows the content to be updated as soon as new data becomes available, rather than relying on information that is available at the time of development of the NAAQS review supporting documents. It also ensures that the public will have access to a consistent set of maps and figures for each NAAQS pollutant that are updated on a routine basis, rather than separated by several years because of the disparate schedules of the various NAAQS reviews for each pollutant. Moreover, a stand-alone document can be expanded to include new air quality analyses as they are completed, rather than following the timeline for the public release of the NAAQS review supporting documents. Finally, this document takes advantage of a more flexible digital format for the routinely prepared maps and trends figures with an end product that more strongly emphasizes visual presentation of data and reduces the amount of text, while also creating a more interactive presentation of the information through the use of external links.
+
+|      This document follows an organizational structure similar to that of the atmospheric sections of past Pb NAAQS review supporting documents. The subsequent sections are as follows: 2. Sources and Emissions of Pb in Ambient Air; 3. Ambient Air Monitoring Requirements and Monitoring Networks; 4. Data Handling Conventions and Computations for Determining Whether the Standards are Met; and 5. Pb Concentrations Measured at Ambient Air Monitoring Sites Across the U.S. These sections are broad enough in scope to communicate relevant information about Pb air quality, including scientific advances, but specific enough that the information needed to develop NAAQS review supporting documents can be quickly and readily retrieved.
+
+## 2. Sources and Emissions of Pb in Ambient Air
+
+```{r label="load-nei-data"}
+curr.year <- params$curr.year; nei.year <- params$nei.year;
+load(paste(base.dir,"data/",curr.year,"/NEI",nei.year,"_allpoll_bycounty_sector.Rdata",sep=""))
+aircraft.pct <- 100*sum(sector.data$Pb[grep("Mobile - Aircraft",sector.data$sector)])/sum(sector.data$Pb,na.rm=TRUE)
+metals.pct <- 100*sum(sector.data$Pb[c(grep("Mining",sector.data$sector),grep("Metals",sector.data$sector))])/sum(sector.data$Pb,na.rm=TRUE)
+comb.pct <- 100*sum(sector.data$Pb[grep("Fuel Comb - ",sector.data$sector)],na.rm=TRUE)/sum(sector.data$Pb,na.rm=TRUE)
+other.pct <- 100*sum(sector.data$Pb[grep("Industrial Processes - ",sector.data$sector)])/sum(sector.data$Pb,na.rm=TRUE) - metals.pct
+```
+
+|      Lead emitted to the air is predominantly from anthropogenic sources in particulate form, with the particles occurring in various sizes[^1]. Once emitted, particle-bound Pb can be transported long or short distances depending on particle size, which influences the amount of time spent in the aerosol phase. Research on particulate matter with mass median diameter of 2.5 and of 10 micrometers (i.e., PM~2.5~ and PM~10~) confirms the transport of airborne Pb in smaller particles appreciable distances from its sources. For example, samples collected at altitude over the Pacific Ocean, as well as the seasonal pattern of Pb-PM~2.5~ at rural sites in the western U.S., indicate transport of Pb from sources in Asia, although such sources have been estimated to contribute less than 1 ng/m^3^ to western U.S. Pb concentrations. In general, larger particles tend to deposit more quickly, within shorter distances from emissions points, while smaller particles remain in aerosol phase and travel longer distances before depositing. As a result, ambient concentrations of Pb near emissions sources are generally much higher, and the representation of larger particles generally greater, than at sites not directly influenced by local emissions sources.
+
+|      The [National Emissions Inventory (NEI)](https://www.epa.gov/air-emissions-inventories) is a comprehensive and detailed estimate of air emissions of criteria pollutants, precursors to criteria pollutants, and hazardous air pollutants from air emissions sources. The NEI is released every three years based primarily upon data provided by State, Local, and Tribal air agencies for sources in their jurisdictions and supplemented by data developed by the EPA. The NEI is built using the EPA’s Emissions Inventory System (EIS) first to collect the data from State, Local, and Tribal air agencies and then to blend that data with other data sources.
+
+|      Accuracy in an emissions inventory reflects the extent to which the inventory represents the actual emissions that occurred. Anthropogenic emissions of air pollutants result from a variety of sources such as power plants, industrial sources, motor vehicles and agriculture. The emissions from any individual source typically vary in both time and space. For the thousands of sources that make up the NEI, there is uncertainty in one or both of these factors. For some sources, such as power plants, direct emission measurements enable the emission factors derived from them to be more certain than sources without such direct measurements. However, it is not practically possible to directly monitor each of the emission sources individually and, therefore, emission inventories necessarily contain assumptions, interpolation and extrapolation from a limited set of sample data.
+
+|      In recent years, the largest source of Pb emissions in the U.S. has been aircraft (`r round(aircraft.pct)`% of total Pb emissions, see Figure 1), many of which still consume fuel containing Pb additives. Other anthropogenic sources of Pb emissions include metal working and mining (`r round(metals.pct)`%), stationary fuel combustion (`r round(comb.pct)`%), and other industrial processes (`r round(other.pct)`%). Lead may also be emitted from natural sources, including volcanoes, sea salt, windborne soil particles, and wildfires, though emissions from these sources are difficult to estimate and are generally far smaller contributors to ambient Pb concentrations than anthropogenic sources.
+
+```{r label="Figure01-emissions-piechart",fig.height=3,fig.width=5,fig.align="center"}
+pie.colors <- c("wheat","gray90","lightpink","lightgreen","lightblue")
+df <- data.frame(sector=c("Aircraft","Industrial","Fuel Comb","Fires","Other"),emis=NA)
+df$emis[1] <- sector.data$Pb[grep("Mobile - Aircraft",sector.data$sector)]
+df$emis[2] <- sum(sector.data$Pb[grep("Industrial Processes -",sector.data$sector)])
+df$emis[3] <- sum(sector.data$Pb[grep("Fuel Comb -",sector.data$sector)],na.rm=TRUE)
+df$emis[4] <- sum(sector.data$Pb[grep("Fires -",sector.data$sector)],na.rm=TRUE)
+df$emis[5] <- sum(sector.data$Pb,na.rm=TRUE)-sum(df$emis[1:4])
+df$pct <- 100*df$emis/sum(df$emis)
+pie.labels <- paste(c("Mobile - Aircraft","Industrial Processes","Stationary Fuel\nCombustion",
+  "Fires","Other")," ",round(df$pct),"%",sep="")
+pie.total <- format(round(sum(df$emis/2000)),big.mark=",")
+pie.title <- paste("Pb Emissions (",pie.total," Tons/year)",sep="")
+par(mar=c(0,5,2,5),bg="gray95",cex=0.75)
+pie(x=df$emis,labels=pie.labels,main=pie.title,col=pie.colors,radius=0.9)
+```
+**Figure 1.** U.S. Pb emissions by sector. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data).
+
+|      Figure 2 shows the Pb emissions density in lbs/mi^2^/year for each U.S. county based on the `r params$nei.year` NEI. The majority of Pb emissions tend to be located near urban areas, where most airports and industrial sources are located. However, there are also some counties in rural areas with higher Pb emissions due to large stationary sources such as industrial boilers or large mining operations.
+
+|      Lead emissions have decreased substantially over the past 50 years, with the most dramatic reductions occurring between 1970 and 1995 due to the removal of Pb from gasoline used in highway vehicles (See [Policy Assessment for the Review of the Lead NAAQS, Final Report, May 2014](https://www.epa.gov/sites/production/files/2020-07/documents/140501_pa_pb_fin.pdf), Figure 2-1). Total Pb emissions are estimated to have declined from over 200,000 tons per year in 1970 to approximately 5,000 tons per year in 1990[^2]. Lead emissions have continued to decrease since 1990 (Figure 3), with significant reductions occurring in the metals industries as a result of national emissions standards for hazardous air pollutants. 
+
+```{r label="Figure02-emissions-map",fig.height=5}
+breaks <- c(0.3,1,3,10)
+density <- county.data$Pb/county.data$area_km*2.59
+map.colors <- c("#EFF3FF","#BDD7E7","#6BAED6","#3182BD","#08519C")
+county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
+N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
+map.legend <- paste(c(0,breaks),"-",c((breaks-0.01),round(max(density)))," (",N,")",sep="")
+map.title <- "Pb Emissions Density in lbs/year/mi^2 (# Counties)"
+layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+draw.map("state",proj.args=pa)
+for (i in 1:nrow(county.data)) {
+  draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
+}
+draw.map("state",proj.args=pa,add=TRUE)
+par(mar=c(0,0,0,0))
+plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
+legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,cex=0.75,bty='n')
+```
+**Figure 2.**	U.S. county-level Pb emissions density estimates in lbs/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
+
+```{r label="Figure03-emissions-trends",fig.height=4,fig.width=6,fig.align="center"}
+trend.border <- c("chocolate","gray50","red","green4","blue")
+trend.colors <- c("wheat","gray90","lightpink","lightgreen","lightblue")
+df <- read.csv(paste(base.dir,"data/",curr.year,"/Lead_emissions_1990_",nei.year,".csv",sep=""))
+if (any(is.na(df))) { df <- sapply(df,function(x) ifelse(is.na(x),0,x)) }
+source.cat <- c("Highway.Vehicles","Non.Road.Mobile","Stationary.Fuel.Combustion",
+                "Industrial.and.Other.Processes")
+df2 <- apply(df[,source.cat],1,cumsum)
+source.labels <- c("Highway Vehicles","Non-Road Mobile","Stationary Fuel Combustion",
+  "Industrial and Other Processes")
+par(mar=c(3,3,1,1),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,las=2)
+plot(x=NULL,y=NULL,type='n',axes=FALSE,xaxs='i',xlim=c(1990,nei.year),
+  xlab="Inventory Year",yaxs='i',ylim=c(0,5),ylab="Pb Emissions (kTons/year)")
+axis(side=1,at=seq(1990,nei.year,3),labels=seq(1990,nei.year,3))
+axis(side=2,at=seq(0,5,1),labels=seq(0,5,1))
+polygon(x=c(1990,rep(nei.year,2),1990),y=c(0,0,5,5),col="gray80")
+abline(h=seq(0.5,4.5,0.5),v=seq(1990,nei.year,3),col="white")
+polygon(x=c(seq(1990,nei.year,3),seq(nei.year,1990,-3)),y=c(df2[1,],rep(0,((nei.year-1990)/3+1))),
+  col=trend.colors[1],border=trend.colors[1])
+for (i in 2:nrow(df2)) {
+  polygon(x=c(seq(1990,nei.year,3),seq(nei.year,1990,-3)),y=c(df2[i,],rev(df2[(i-1),])),
+    col=trend.colors[i],border=trend.colors[i])
+}
+for (i in 1:nrow(df2)) { lines(x=seq(1990,nei.year,3),y=df2[i,],col=trend.border[i]) }
+legend("topright",legend=rev(source.labels),fill=rev(trend.colors[1:4]),border=rev(trend.border[1:4]),cex=0.75,bty='n')
+box()
+```
+**Figure 3.**	U.S. anthropogenic Pb emissions trend, 1990-`r params$nei.year`. **Source:** [Our Nation's Air: Status and Trends Through `r params$curr.year`](https://gispub.epa.gov/air/trendsreport/`r (params$curr.year+1)`)
+
+## 3. Ambient Air Monitoring Requirements and Monitoring Networks
+
+```{r label="load-monitor-data"}
+load(paste(base.dir,"data/",curr.year,"/monitors_",curr.year-2,"_",curr.year,".Rdata",sep=""))
+load(paste(base.dir,"data/",curr.year,"/nonreg_monitors_",curr.year-2,"_",curr.year,".Rdata",sep=""))
+colors <- c("gray50","blue3","yellow3","red3")
+pb.sites <- subset(pb.monitors,!duplicated(substr(id,1,9)))
+pb.nonreg.sites <- subset(pb.nonreg.monitors,!duplicated(paste(parameter,substr(id,1,9))))
+```
+
+|      Ambient air Pb concentrations are measured by four national monitoring networks. The networks include the State and Local Air Monitoring Sites (SLAMS) intended for Pb NAAQS surveillance, the PM~2.5~ Chemical Speciation Network (CSN), the Interagency Monitoring of Protected Visual Environments (IMPROVE) network, and the National Air Toxics Trends Stations (NATTS) network. All of the data from these monitoring networks are accessible via the EPA’s [Air Quality System (AQS)](http://www.epa.gov/aqs/) database.
+
+|      The indicator for the current Pb NAAQS is lead measured in total suspended particulates (Pb-TSP). However, in some situations[^3], lead measured in PM~10~ (Pb-PM~10~) may be used in determining attainment with the NAAQS. Accordingly, Federal Reference Methods (FRMs) have been established for sampling Pb-TSP[^4] and for Pb-PM~10~[^5]. Additionally, there are 29 Federal Equivalent Methods (FEMs) currently approved for sampling Pb-TSP, and there is one FEM currently approved for sampling Pb-PM~10~. 
+
+|      The current Pb monitoring network design requirements for NAAQS compliance purposes are listed in Appendix D to 40 CFR part 58. Monitoring is required near sources of Pb emissions which are expected to or have been shown to contribute to ambient air Pb concentrations in excess of the NAAQS. At a minimum, there must be one source-oriented site located to measure the maximum Pb concentration in ambient air resulting from each non-airport Pb source estimated to emit 0.5 or more tons of Pb per year and from each airport estimated to emit 1.0 or more tons of Pb per year. Figure 4 below shows the locations of the `r nrow(pb.sites)` monitoring sites that reported regulatory Pb data[^6] to the EPA during the `r params$curr.year-2`-`r params$curr.year` period.
+
+```{r label="Figure04-reg-monitor-map",fig.height=5}
+pb.monitors$site <- substr(pb.monitors$id,1,9)
+t <- ddply(pb.monitors,"site",summarize,latitude=as.numeric(latitude[1]),
+  longitude=as.numeric(longitude[1]),type=min(monitor_type))
+t$color <- sapply(tolower(t$type),switch,slams=colors[1],
+  tribal=colors[2],industrial=colors[3],spm=colors[4],colors[4])
+N <- table(t$type)[c(2,1,4,3)]
+legend.lab <- paste(c("SLAMS","INDUSTRIAL","TRIBAL","SPM/OTHER")," (",N,")",sep="")
+
+layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
+draw.map("state",proj.args=pa,hires=TRUE,col="grey95")
+for (i in 1:nrow(t)) {
+  add.layer(type="points",x=t$longitude[i],y=t$latitude[i],
+    proj.args=pa,bg=t$color[i],pch=21)
+}
+plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
+legend("bottom",legend=legend.lab,pt.bg=colors[c(1,3,2,4)],pch=21,cex=0.75,
+  title="Monitor Type (# Sites)",bty='n',pt.cex=1.25,ncol=4)
+```
+**Figure 4:** Map of U.S. ambient air monitoring sites reporting regulatory Pb data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
+
+|      The CSN and IMPROVE ambient air monitoring networks measure Pb in PM~2.5~, while the NATTS network provides measurements of Pb in PM~10~. The locations of these `r nrow(pb.nonreg.sites)` non-regulatory Pb monitoring sites are shown in Figure 5 below. The 'Other' category includes Special Purpose Monitors (SPMs), Pb-PM~10~, and Pb-TSP monitors which do not meet the requirements in [40 CFR Part 58](https://www.ecfr.gov/current/title-40/chapter-I/subchapter-C/part-58) for reporting regulatory data.
+
+```{r label="Figure05-nonreg-monitor-map",fig.height=5}
+pb.nonreg.monitors$site <- substr(pb.nonreg.monitors$id,1,9)
+pb.nonreg.monitors$class <- sapply(pb.nonreg.monitors$network,function(x) ifelse(grepl("CSN",x),"CSN",
+  ifelse(grepl("IMPROVE",x),"IMPROVE",ifelse(grepl("NCORE",x) | grepl("NATTS",x),"NATTS","OTHER"))))
+t <- ddply(pb.nonreg.monitors,c("parameter","site"),summarize,latitude=as.numeric(latitude[1]),
+   longitude=as.numeric(longitude[1]),class=min(class))
+t$color <- sapply(substr(t$class,1,1),function(x) switch(x,
+  C=colors[1],I=colors[2],N=colors[3],colors[4]))
+t$pch <- sapply(t$parameter,function(x) ifelse(x == "88128",21,ifelse(x %in% c("82128","85128"),22,24)))
+t <- t[order(t$class,t$pch,decreasing=TRUE),]
+N1 <- table(t$pch); N2 <- table(t$class);
+legend.lab1 <- paste(c("Pb-PM2.5","Pb-PM10","Pb-TSP STP")," (",N1,")",sep="")
+legend.lab2 <- paste(names(N2)," (",N2,")",sep="")
+
+layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.2))
+draw.map("state",proj.args=pa,hires=TRUE,col="grey95")
+for (i in 1:nrow(t)) {
+  add.layer(type="points",x=t$longitude[i],y=t$latitude[i],
+    proj.args=pa,bg=t$color[i],pch=t$pch[i])
+}
+## Draw NATTS sites back on top
+natts <- subset(t,class == "NATTS" & parameter != "88128")
+add.layer(type="points",x=natts$longitude,y=natts$latitude,
+  proj.args=pa,bg="yellow3",pch=22)
+plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
+legend("top",legend=legend.lab1,pch=c(21,22,24),pt.bg="white",cex=0.75,
+  pt.cex=1.25,bty='n',ncol=3,title="Measurement Type (# Sites)")
+legend("bottom",legend=legend.lab2,pch=21,pt.bg=colors,cex=0.75,
+  pt.cex=1.25,bty='n',ncol=4,title="Monitoring Network (# Sites)")
+```
+**Figure 5:** Map of U.S. ambient air monitoring sites reporting non-regulatory Pb data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
+
+|      The [Chemical Speciation Network (CSN)](https://www.epa.gov/amtic/chemical-speciation-network-csn) consists of 53 long-term trends sites (commonly referred to as the Speciation Trends Network or STN sites) and approximately 100 supplemental sites, all operated by state and local monitoring agencies. Nearly all of the CSN sites are in urban areas, often at the location of highest known PM~2.5~ concentrations. The first CSN sites began operation in 2000. STN sites operate on a 1 in 3 day sampling schedule, while most supplemental sites operate on a 1 in 6 day sampling schedule.
+
+|      The IMPROVE network is administered by the National Park Service, largely with funding by the EPA, on behalf of federal land management agencies and state air agencies that use the data to track trends in rural visibility. Data are managed and made accessible mainly through the [IMPROVE website](http://vista.cira.colostate.edu/improve/) but are also available via AQS. Samplers are operated by several different federal, state, and tribal host agencies on the same 1 in 3 day schedule as the STN. In the IMPROVE network, PM~2.5~ monitors are placed in “Class I” areas (including National Parks and wilderness areas) and are mostly in rural locations. The oldest of these sites began operation in 1988, while many others began in the mid 1990s. There are 110 formally designated IMPROVE sites, though about 80 additional sites are informally treated as part of the network.
+
+|      The [National Air Toxic Trends Station (NATTS)](https://www.epa.gov/amtic/air-toxics-ambient-monitoring#natts) network was developed to fulfill the need for long-term air toxics, also known as hazardous air pollutants (HAPs), monitoring data of consistent quality. Among the principle objectives of the NATTS network are assessing trends and emission reduction program effectiveness, assessing and verifying air quality models (e.g., exposure assessments, emission control strategy development, etc.), and to provide data for direct input to source-receptor models. The network was initiated in 2003, and the current network configuration includes 26 sites (21 urban, 5 rural) across the United States. There are typically over 100 pollutants monitored at each NATTS, although only 19 of those are formally required. Target HAPs include volatile organic compounds (VOCs), carbonyls, PM~10~ metals including Pb, and polycyclic aromatic hydrocarbons (PAHs).
+
+## 4. Data Handling Conventions and Computations for Determining Whether the Standards are Met
+
+|      To assess whether a monitoring site or geographic area (usually a county or urban area) meets or exceeds a NAAQS, the monitoring data are analyzed consistent with the established regulatory requirements for the handling of monitoring data for the purposes of deriving a design value. A design value summarizes ambient air concentrations for an area in terms of the indicator, averaging time and form for a given standard such that its comparison to the level of the standard indicates whether the area meets or exceeds the standard. The procedures for calculating design values for the current Pb NAAQS (established in 2008) are detailed in [Appendix R to 40 CFR Part 50](https://www.ecfr.gov/current/title-40/part-50/appendix-Appendix%20R%20to%20Part%2050) and are summarized below.
+
+|      Daily 24-hour Pb-TSP and Pb-PM~10~ measurements collected at an ambient air monitoring site using Federal Reference or Equivalent Methods and meeting all applicable requirements in [40 CFR Part 58](https://www.ecfr.gov/current/title-40/chapter-I/subchapter-C/part-58) are reported to AQS in micrograms per meter cubed ($\mu$g/m^3^) and truncated after the third decimal place for use in design value calculations. If multiple monitors collect measurements at the same site, one monitor is designated as the primary monitor. Missing data values at the primary monitor are supplemented with data collected from collocated monitors to create a site-level dataset, however, Pb-TSP measurements may not be combined with Pb-PM~10~ measurements.
+
+|      Monthly mean concentrations are calculated for each site-level dataset for a 38-month period consisting of 3 consecutive calendar years, plus the final two months of the year preceding the first calendar year (e.g., if the years are 2016-2018, then the 38-month period consists of November 2015 through December 2018). These monthly means are then averaged across rolling 3-month periods (e.g., January to March, February to April, etc.) to create a set of 36 rolling 3-month means. The design value is the maximum of these 36 rolling 3-month means, rounded to the nearest hundredth $\mu$g/m^3^. The Pb NAAQS are met when the design value is less than or equal to 0.15 $\mu$g/m^3^.
+
+|      Design values must also meet a minimum data completeness requirement in order to be considered valid. Specifically, monthly data capture rates are calculated for each month in the 38-month period, then averaged across rolling 3-month periods, similar to the concentration means. The data completeness requirements are met if the minimum of these 36 rolling 3-month average data capture rates is at least 75 percent. In addition, there are two data substitution tests specified in [Appendix R to 40 CFR Part 50](https://www.ecfr.gov/current/title-40/part-50/appendix-Appendix%20R%20to%20Part%2050) which may be used to yield a valid design value above or below the NAAQS, respectively, in the event that a site falls short of the minimum data completeness requirement.
+
+## 5. Pb Concentrations Measured at Ambient Air Monitoring Sites Across the U.S.
+
+```{r label="load-conc-data"}
+load(paste(base.dir,"data/",curr.year,"/PBannual1980_",curr.year,".Rdata",sep=""))
+load(paste(base.dir,"data/",curr.year,"/PBdvs2010_",curr.year,".Rdata",sep=""))
+load(paste(base.dir,"data/",curr.year,"/PBtrends2010_",curr.year,".Rdata",sep=""))
+
+years <- c(2010:curr.year); ny <- length(years);
+median.yr1 <- median(subset(pb.annual,year == 1980 & N >= 9)$conc)
+median.yr2 <- median(subset(pb.annual,year == curr.year & N >= 9)$conc)
+pct.chg <- round(100*(median.yr1-median.yr2)/median.yr1)
+```
+
+|      Table 1 below presents summary statistics based on three NAAQS-related metrics for Pb concentration data, the daily 24-hour samples, the monthly mean concentrations, and the 3-month rolling averages. These statistics are presented for year-round and each calendar quarter based on monitoring sites that reported regulatory Pb-TSP data to AQS during the `r params$curr.year-2`-`r params$curr.year` period. Table 2 presents the same set of summary statistics for the same three metrics for regulatory and non-regulatory Pb measurements based on the type of measurement and type of site. As might be expected, the highest Pb concentrations are measured at "source-oriented" sites located near major sources of Pb emissions, and urban monitoring sites located away from major sources tend to measure higher concentrations of Pb than rural monitoring sites.
+
+\newpage
+
+**Table 1.** Distribution of regulatory Pb-TSP concentrations in $\mu$g/m^3^ for `r params$curr.year-2`-`r params$curr.year`.[^7] **Source:** [AQS](https://www.epa.gov/aqs).
+```{r label="Table1"}
+load(paste(base.dir,"data/",curr.year,"/conctables",curr.year-2,"_",curr.year,".Rdata",sep=""))
+kbl(pb.table1[,-2],booktabs=TRUE,format.args=list(big.mark=","),linesep=c("","","","","\\addlinespace")) %>% kable_styling(latex_options=c("hold_position","scale_down")) %>% row_spec(0,bold=TRUE)
+```
+N.sites = number of sites; N.obs = number of observations; SD = standard deviation; min = minimum; p1, p5, p10, p25, p50, p90, p95, p98, p99 = 1st, 5th, 10th, 25th, 50th, 90th, 95th, 98th, 99th percentiles; max = maximum; max.site = AQS ID number for the monitoring site corresponding to the observation in the max column.
+1st quarter = January/February/March; 2nd quarter = April/May/June; 3rd quarter = July/August/September; 4th quarter = October/November/December.
+
+**Table 2.** Distribution of Pb concentrations for various types of measurements and monitoring site locations in $\mu$g/m^3^ for `r params$curr.year-2`-`r params$curr.year`.^7^ **Source:** [AQS](https://www.epa.gov/aqs).
+
+```{r label="Table2"}
+load(paste(base.dir,"data/",curr.year,"/conctables",curr.year-2,"_",curr.year,".Rdata",sep=""))
+kbl(pb.table2,booktabs=TRUE,format.args=list(big.mark=","),linesep=c("","","","","\\addlinespace")) %>% kable_styling(latex_options=c("hold_position","scale_down")) %>% row_spec(0,bold=TRUE)
+```
+N.sites = number of sites; N.obs = number of observations; SD = standard deviation; min = minimum; p1, p5, p10, p25, p50, p90, p95, p98, p99 = 1st, 5th, 10th, 25th, 50th, 90th, 95th, 98th, 99th percentiles; max = maximum; max.site = AQS ID number for the monitoring site corresponding to the observation in the max column. 
+Source = Source-Oriented Sites; Non-Source = All Other Sites; Urban = CSN, NCore, and NATTS sites; Rural = IMPROVE sites.
+
+\newpage
+
+|      Figure 6 below shows a map of the Pb design values at U.S. ambient air monitoring sites based on data from the `r params$curr.year-2`-`r params$curr.year` period. There were `r sum(subset(pb.dvs,year == curr.year & valid_dv == "Y")$dv > 0.15)` sites with design values exceeding the NAAQS. The maximum design value was `r max(subset(pb.dvs,year == curr.year & valid_dv == "Y")$dv)` $\mu$g/m^3^.
+
+```{r label="Figure06-design-value-map",fig.height=5}
+dvs.pb.3mo <- subset(pb.dvs,year == curr.year & valid_dv == "Y",
+  c("site","latitude","longitude","year","dv"))
+vals <- dvs.pb.3mo$dv; o <- order(vals);
+colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(0.06,0.11,0.16,0.21); 
+pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
+bin.min <- c(min(vals),bins); bin.max <- c(bins-0.01,max(vals));
+N <- table(cut(vals,breaks=c(0,bins-0.01,Inf))); keep <- which(N > 0);
+legend.lab <- paste(sprintf("%5.2f",bin.min)," - ",sprintf("%5.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
+if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
+layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
+draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+add.layer(type="points",x=dvs.pb.3mo$longitude[o],y=dvs.pb.3mo$latitude[o],
+  proj.args=pa,pch=21,col="black",bg=pt.col[o])
+plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
+legend("bottom",legend=legend.lab[keep],pch=21,col="black",
+  pt.bg=colors[keep],cex=0.75,pt.cex=1.25,bty='n',ncol=3)
+```
+**Figure 6:** Pb design values in $\mu$g/m^3^ for the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
+
+\newpage
+
+|      Figure 7 below shows a map of the site-level trends in the Pb design values at U.S. monitoring sites having valid design values in at least `r ceiling(0.75*ny)` of the `r ny` 3-year periods from 2008-2010 through `r params$curr.year-2`-`r params$curr.year`. The trends were computed using the Thiel-Sen estimator, and tests for significance (p-value < 0.05) were computed using the Mann-Kendall test. From this figure it is apparent that design values have decreased significantly at most sites in the U.S. during this period.
+
+```{r label="Figure07-dv-trends-map",fig.height=5}
+pt.col <- c("#0000FFFF","#AAAAFFFF","#FFFFFFFF","#FFAAAAFF","#FF0000FF")
+pt.cex <- c(1.25,1,0.75,1,1.25); pt.pch <- c(25,25,21,24,24);
+txt <- c("Decreasing > 0.05 ug/m^3/yr","Decreasing < 0.05 ug/m^3/yr",
+  "No Significant Trend","Increasing < 0.05 ug/m^3/yr","Increasing > 0.05 ug/m^3/yr")
+cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
+  ifelse(slope > 0,ifelse(slope < 0.05,4,5),ifelse(slope > -0.05,2,1))),
+  pval=pb.site.dvs.3mo$pval,slope=pb.site.dvs.3mo$slope)
+ind <- as.integer(names(table(cat))); r <- order(abs(pb.site.dvs.3mo$slope));
+legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
+layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
+draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+add.layer(type="points",x=pb.site.dvs.3mo$longitude[r],y=pb.site.dvs.3mo$latitude[r],
+  proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
+par(mar=c(0,0,0,0))
+plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
+legend("bottom",legend=legend.txt,bty='n',col="black",cex=0.75,
+  pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
+
+## Calculate statistics for the text in the next paragraph
+median.curr <- median(pb.site.dvs.3mo[,as.character(curr.year)],na.rm=TRUE)
+median.past <- median(pb.site.dvs.3mo[,c("2010")],na.rm=TRUE)
+pct.change <- round(100*(median.past-median.curr)/median.past)
+```
+**Figure 7:** Site-level trends in Pb design values based on data from 2010 through `r params$curr.year`. **Source:** [AQS](https://www.epa.gov/aqs), trends computed using R statistical software.
+
+\newpage
+
+|      Figure 8 below shows the national trend in the design values based on the `r nrow(pb.site.dvs.3mo)` monitoring sites shown in Figure 7. The median design value based on these sites decreased by `r pct.change`% from 2010 (`r round(median.past,3)` $\mu$g/m^3^) to `r params$curr.year` (`r round(median.curr,3)` $\mu$g/m^3^). Due to large-scale changes in the monitoring network after the current Pb NAAQS were established in 2008, there are not a sufficient number of continuously operating Pb monitoring sites to construct longer-term trends in Pb concentrations. However, previous assessments have shown reductions of over 90% in national median Pb concentrations measured at ambient air monitoring sites between 1980 and 2010 (See [Policy Assessment for the Review of the Lead NAAQS, Final Report, May 2014](https://www.epa.gov/sites/production/files/2020-07/documents/140501_pa_pb_fin.pdf), Figure 2-7).
+
+```{r label="Figure08-national-trend-dvs",fig.height=4,fig.width=6,fig.align="center"}
+pb.trend.dvs.3mo <- apply(pb.site.dvs.3mo[,-c(1:3)],2,quantile,probs=c(0.1,0.5,0.9),na.rm=TRUE)
+par(mar=c(3,3,1,1),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(2009.5,curr.year+0.5),
+  xlab="",yaxs='i',ylim=c(0,1.05),ylab="Pb Design Value (ug/m^3)",main="")
+axis(side=1,at=years,labels=years,las=2)
+polygon(x=c(2009.5,rep(curr.year+0.5,2),2009.5),y=c(0,0,1.05,1.05),col="gray80")
+abline(h=seq(0.1,1,0.1),v=years,col="white")
+lines(x=years,y=pb.trend.dvs.3mo[1,1:ny],lty=2,lwd=1.5,col="steelblue")
+lines(x=years,y=pb.trend.dvs.3mo[2,1:ny],lty=1,lwd=1.5,col="steelblue")
+lines(x=years,y=pb.trend.dvs.3mo[3,1:ny],lty=2,lwd=1.5,col="steelblue")
+abline(h=0.15,lty=2,lwd=1.5,col="black"); box();
+legend("topright",legend=c("10th/90th Percentile DV","Median DV","Pb NAAQS Level"),
+  lty=c(2,1,2),col=c(rep("steelblue",2),"black"),cex=0.75,lwd=1.5,bty='n')
+```
+**Figure 8:** National trend in Pb design values in $\mu$g/m^3^, 2010 to `r params$curr.year`. **Source:** [AQS](https://www.epa.gov/aqs).
+
+\newpage
+
+|      Figure 9 below shows the national distribution of annual 3-month maximum Pb concentrations reported in each year from 1980 to `r params$curr.year` based on data reported to AQS from regulatory Pb monitoring sites.[^8] The red line shows the number of sites included in the boxplot for each year. The median concentration decreased by `r pct.chg`%, from `r round(median.yr1,2)` $\mu$g/m^3^ in 1980 to `r round(median.yr2,3)` $\mu$g/m^3^ in `r params$curr.year`. Maximum Pb concentrations sometimes exceeded 10 $\mu$g/m^3^ in the 1980's and 1990's, while by comparison there have been no 3-month average Pb values above 0.5 $\mu$g/m^3^ reported since 2014. The Pb monitoring network expanded following the establishment of a Pb NAAQS in 1978, reaching a maximum size of over 500 sites in 1985. The network size decreased from 1985 to 2000, as Pb was removed from gasoline and large industrial sources were cleaned up. Over half of Pb sites nationally were discontinued during that time period, many of which were measuring low concentrations. The slight increase in the median concentration from 1996 to 1999 in Figure 9 likely resulted from this reduction in sites measuring low concentrations. 
+
+|      Following the revision of the Pb NAAQS in 2008 and associated revisions to the monitoring regulations in 2010, the monitoring network nearly doubled in size between 2009 and 2012 due to new requirements for Pb monitoring near sources, as described previously in section 3. The installation of many new source-oriented Pb sites also resulted in a slight increase in the median Pb concentration during this period. Over the past decade, the Pb monitoring network has again decreased in size by nearly half as many sites measuring low Pb concentrations have been shut down. The distribution of annual maximum 3-month concentrations has stayed relatively constant since 2015, as the discontinuation of monitors measuring low concentrations has offset reductions due to emissions controls at industrial sources.
+
+```{r label="Figure09-conc-boxplots-annual",fig.height=5}
+pb.annual <- subset(pb.annual,N >= 9)
+pb.stats <- tapply(log10(pmax(pb.annual$conc,1e-3)),list(pb.annual$year),
+  get.stats,whiskers="pct",wlen=98)
+N <- table(pb.annual$year); years <- c(1980:curr.year);
+par(mar=c(3,3,1,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
+  yaxs='i',yaxt='n',ylim=c(-3,1.5),ylab="Maximum 3-month Pb Concentration (ug/m^3)",main="")
+yaxs.labs <- c(0.001,0.002,0.005,0.01,0.02,0.05,0.1,0.2,0.5,1,2,5,10,20)
+axis(side=1,at=years,labels=years,las=2)
+axis(side=2,at=log10(yaxs.labs),labels=yaxs.labs,las=2)
+axis(side=4,at=seq(-3,1.5,0.75),labels=seq(0,600,100),las=2)
+mtext("Number of Sites",side=4,line=2,at=-0.75,adj=0.5,cex=0.75)
+polygon(x=c(1979.5,rep(curr.year+0.5,2),1979.5),y=c(-3,-3,1.5,1.5),col="gray80")
+abline(h=log10(yaxs.labs),v=years,col="white")
+for (i in 1:length(pb.stats)) {
+  draw.boxplot(pb.stats[[i]],center=i+1979,width=0.8,col="blue3",fill="cyan",cex=0.5)
+}
+lines(x=years,y=N/(400/3)-3,lwd=1.5,col="red3")
+abline(h=log10(0.15),lty=2,lwd=1.5,col="black"); box();
+legend("topright",legend=c("Number of Pb Sites","Pb NAAQS Level"),
+  lty=c(1,2),lwd=1.5,col=c("red3","black"),bty='n',cex=0.75)
+```
+**Figure 9:** Distribution of annual maximum 3-month concentrations measured at regulatory Pb monitoring sites, 1980 to `r params$curr.year`. Boxes represent the median and interquartile range, whiskers extend to the 1st and 99th percentiles, and values outside this range are shown as circles. The red line shows the number of sites reporting regulatory data to EPA in each year. *Note: the concentrations on the left-hand y-axis are shown on a logarithmic scale.* **Source:** [AQS](https://www.epa.gov/aqs).
+
+\newpage
+
+## References
+
+U.S. EPA. [Integrated Science Assessment (ISA) for Lead (Final Report, July 2013)](https://ordspub.epa.gov/ords/eims/eimscomm.getfile?p_download_id=518908). U.S. Environmental Protection Agency, Washington, DC, EPA/600/R-10/075F, 2013.
+
+U.S. EPA. [Policy Assessment for the Review of the Lead NAAQS (Final Report, May 2014)](https://www.epa.gov/sites/production/files/2020-07/documents/140501_pa_pb_fin.pdf). U.S. Environmental Protection Agency, Research Triangle Park, NC, EPA-452/R-14-001, 2014.
+
+## Additional Resources
+
+- [Lead Air Pollution](https://www.epa.gov/lead-air-pollution)
+
+- [Lead (Pb) Air Quality Standards](https://www.epa.gov/naaqs/lead-pb-air-quality-standards)
+
+- [National Emissions Inventory (NEI)](https://www.epa.gov/air-emissions-inventories/national-emissions-inventory-nei)
+
+- [Ambient Monitoring Technology Information Center (AMTIC)](https://www.epa.gov/amtic)
+
+- [Air Quality Design Values](https://www.epa.gov/air-trends/air-quality-design-values)
+
+- [National Air Quality: Status and Trends of Key Air Pollutants](https://www.epa.gov/air-trends)
+
+- [Air Data: Air Quality Data Collected at Outdoor Monitors Across the U.S.](https://www.epa.gov/outdoor-air-quality-data)
+
+[^1]: While in some circumstances Pb can be emitted in gaseous form, the Pb compounds that may be produced initially in vapor phase can be expected to condense into particles upon cooling to ambient temperature and/or upon oxidizing with mixing into the atmosphere.
+[^2]: In addition, data collected at 5 near-roadway sites continuously monitored from the late 1970's through 2010 document reduction of roadside 3-month average Pb concentrations from over 1 $\mu$g/m^3^ to below 0.03 $\mu$g/m^3^. (2014 Pb PA, Figure 2-9).
+[^3]: The Pb-PM~10~ measurements may be used for NAAQS monitoring as an alternative to Pb-TSP measurements in certain conditions defined in [Appendix C to 40 CFR Part 58 ](https://www.ecfr.gov/current/title-40/part-58/appendix-Appendix%20C%20to%20Part%2058). As of 2023, there were no remaining sites reporting regulatory Pb-PM~10~ data to AQS.
+[^4]: The current FRM for the measurement of Pb-TSP is provided in [Appendix G to 40 CFR Part 50](https://www.ecfr.gov/current/title-40/part-50/appendix-Appendix%20G%20to%20Part%2050). This FRM includes sampling using a high-volume TSP sampler that meets the design criteria identified in [Appendix B to 40 CFR Part 50](https://www.ecfr.gov/current/title-40/part-50/appendix-Appendix%20B%20to%20Part%2050) and sample analysis for Pb content using Inductively Coupled Plasma Mass Spectrometry (ICPMS).
+[^5]: The FRM for the measurement of Pb-PM~10~ is provided in [Appendix Q to 40 CFR Part 50](https://www.ecfr.gov/current/title-40/part-50/appendix-Appendix%20Q%20to%20Part%2050). This FRM uses a PM~10~ sampler as defined in [Appendix O to 40 CFR Part 50](https://www.ecfr.gov/current/title-40/part-50/appendix-Appendix%20O%20to%20Part%2050) (PM~10c~) and is coupled with x-ray fluorescence (XRF). 
+[^6]: Regulatory Pb data includes all Pb-TSP data and Pb-PM~10~ data collected using federal reference methods (FRMs) or federal equivalent methods (FEMs) and submitted to EPA's Air Quality System (AQS), or otherwise available to EPA, and meeting the requirements of [40 CFR part 58](https://www.ecfr.gov/current/title-40/chapter-I/subchapter-C/part-58) including appendices A, C, and E.
+[^7]: Negative concentration values may appear in AQS datasets down to the negative of the lower detection limit (LDL) to allow for normal instrument variability at very low concentrations. Data that exceed the negative of the LDL is typically indicative of a malfunction or another issue that affects the data defensibility.
+[^8]: For this analysis, monthly mean Pb-TSP and regulatory Pb-PM~10~ data were retrieved from AQS, and rolling 3-month averages were calculated for each site/measurement type for each 3-month period where 11 or more daily measurements were available. The annual maximum 3-month value was determined for each site/year, if at least nine 3-month averages were available. These values are not design values as the requirements of Appendix R to 40 CFR part 50 were not applied.
