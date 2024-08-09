@@ -164,25 +164,25 @@ nox.trends <- apply(df[c(nrow(df):1),-1],2,cumsum)
 ```{r label="Figure03-emissions-piecharts",fig.height=7.5}
 pie.colors <- c("wheat","gray90","lightpink","lightgreen","lightblue")
 
-pm25.labels <- paste(c("Wildfires","Agricultural &\n Prescribed Fires","Unpaved\nRoad\nDust",
+pm25.labels <- paste(c("Wildfires","Agricultural &\nPrescribed Fires","Unpaved\nRoad\nDust",
   "Paved Road\nDust","Construction\nDust","Crops & Livestock\nDust","Stationary Fuel Combustion",
   "Industrial\nProcesses","Mobile\nSources","Waste\nDisposal","Other")," ",round(pm25.df$pct),"%",sep="")
 pm25.total <- format(round(sum(pm25.df$emis/1000)),big.mark=",")
 pm25.title <- paste("A) Primary PM2.5 Emissions (",pm25.total," kTon/year)",sep="")
 
-pm10.labels <- paste(c("Wildfires","Agricultural &\nPrescribed Fires","Unpaved Road Dust",
+pm10.labels <- paste(c("Wildfires","Agricultural &\nPrescribed Fires","Unpaved\nRoad Dust",
   "Paved Road\nDust","Construction\nDust","Crops & Livestock Dust","Industrial\nProcesses",
   "Stationary Fuel\nCombustion","Mobile\nSources","Other")," ",round(pm10.df$pct),"%",sep="")
 pm10.total <- format(round(sum(pm10.df$emis/1000)),big.mark=",")
 pm10.title <- paste("B) Primary PM10 Emissions (",pm10.total," kTon/year)",sep="")
 
 so2.labels <- paste(c("Wildfires","Agricultural &\nPrescribed\nFires",
-  "Stationary Fuel\nCombustion: Coal","Stationary Fuel\nCombustion: Other",
-  "Industrial Processes","Mobile\nSources","Other")," ",round(so2.df$pct),"%",sep="")
+  "Stationary Fuel\nCombustion:\nCoal","Stationary Fuel\nCombustion: Other",
+  "Industrial Processes","\nMobile\nSources","Other")," ",round(so2.df$pct),"%",sep="")
 so2.total <- format(round(sum(so2.df$emis/1000)),big.mark=",")
 so2.title <- paste("C) SO2 Emissions (",so2.total," kTon/year)",sep="")
 
-nox.labels <- paste(c("Biogenics","All Fires","Stationary Fuel Combustion","Industrial\nProcesses",
+nox.labels <- paste(c("Biogenics","All Fires","Stationary Fuel Combustion","Industrial\nProcesses\n",
   "Highway\nVehicles","Non-Road\nMobile","Other")," ",round(nox.df$pct),"%",sep="")
 nox.total <- format(round(sum(nox.df$emis/1000)),big.mark=",")
 nox.title <- paste("D) NOx Emissions (",nox.total," kTon/year)",sep="")
@@ -204,75 +204,83 @@ abline(h=0,v=0); box();
 |      Figure 4 through Figure 7 show county-level estimates of U.S. emissions densities (in tons/year/mi^2^) for primary PM~2.5~, primary PM~10~, SO~2~, and NO~X~ emissions, respectively based on the `r params$nei.year` NEI. Primary PM emissions tended to be highest near urban areas due to the larger number of industrial sources and vehicles, and near the center of the country due to dust from roads and agricultural sources. Parts of the northwest U.S. and California also experienced higher primary PM emissions due to wildfires in `r params$nei.year`. The highest SO~2~ emissions tend to be located near large point sources such as coal-fired power plants or large industrial facilities, while the highest NO~X~ emissions tend to be located near urban areas and large point sources.
 
 ```{r label="Figure04-emissions-map-PM25"}
-breaks <- c(2,5,10,20)
-density <- county.data$PM25/county.data$area_km*2.59
-map.colors <- c("#EFF3FF","#BDD7E7","#6BAED6","#3182BD","#08519C")
+breaks <- c(1,2,5,10,20)
+density <- round(county.data$PM25/county.data$area_km*2.59,1)
+map.colors <- c("#FFFFCC","#C7E9B4","#7FCDBB","#41B6C4","#2C7FB8","#253494")
 county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
 N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
-map.legend <- paste(c(0,breaks),"-",c((breaks-0.1),round(max(density)))," (",N,")",sep="")
+map.legend <- paste(c("0.0",sprintf("%3.1f",breaks+0.1))," - ",c(sprintf("%3.1f",breaks),
+  round(max(density)))," (",format(N,trim=TRUE,big.mark=","),")",sep="")
 map.title <- "Primary PM2.5 Emissions Density in tons/year/mi^2 (# Counties)"
-layout(matrix(c(1,2),2,1),widths=1,heights=c(0.9,0.1))
-par(bg="gray95"); draw.map("state",proj.args=pa);
+layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa)
 for (i in 1:nrow(county.data)) {
   draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
 }
 draw.map("state",proj.args=pa,add=TRUE)
-par(mar=c(0,0,0,0)); plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1));
-legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,cex=0.75,bty='n')
+plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
+legend("top",legend=map.legend,ncol=6,fill=map.colors,title=map.title,cex=0.75,bty='n')
 ```
 **Figure 4.**	U.S. county-level primary PM~2.5~ emissions density estimates in tons/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
 
 ```{r label="Figure05-emissions-map-PM10"}
-breaks <- c(5,10,20,50)
-density <- county.data$PM10/county.data$area_km*2.59
+breaks <- c(5,10,20,50,100)
+density <- round(county.data$PM10/county.data$area_km*2.59)
 county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
 N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
-map.legend <- paste(c(0,breaks),"-",c((breaks-0.1),round(max(density)))," (",N,")",sep="")
+map.legend <- paste(c("0",breaks+1)," - ",c(breaks,round(max(density))),
+  " (",format(N,trim=TRUE,big.mark=","),")",sep="")
 map.title <- "Primary PM10 Emissions Density in tons/year/mi^2 (# Counties)"
-layout(matrix(c(1,2),2,1),widths=1,heights=c(0.9,0.1))
-par(bg="gray95"); draw.map("state",proj.args=pa);
+layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa)
 for (i in 1:nrow(county.data)) {
   draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
 }
 draw.map("state",proj.args=pa,add=TRUE)
-par(mar=c(0,0,0,0)); plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1));
-legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,cex=0.75,bty='n')
+plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
+legend("top",legend=map.legend,ncol=6,fill=map.colors,title=map.title,cex=0.75,bty='n')
 ```
 **Figure 5.**	U.S. county-level primary PM~10~ emissions density estimates in tons/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
 
 ```{r label="Figure06-emissions-map-SO2"}
-breaks <- c(0.3,1,3,10)
-density <- county.data$SO2/county.data$area_km*2.59
+breaks <- c(0.3,1,3,10,30)
+density <- round(county.data$SO2/county.data$area_km*2.59,2)
 county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
 N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
-map.legend <- paste(c(0,breaks),"-",c((breaks-0.01),round(max(density)))," (",N,")",sep="")
+map.legend <- paste(c("0.0",sprintf("%3.1f",breaks+0.1))," - ",c(sprintf("%3.1f",breaks),
+  round(max(density)))," (",format(N,trim=TRUE,big.mark=","),")",sep="")
 map.title <- "Sulfur Dioxide Emissions Density in tons/year/mi^2 (# Counties)"
-layout(matrix(c(1,2),2,1),widths=1,heights=c(0.9,0.1))
-par(bg="gray95"); draw.map("state",proj.args=pa);
+layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa)
 for (i in 1:nrow(county.data)) {
   draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
 }
 draw.map("state",proj.args=pa,add=TRUE)
-par(mar=c(0,0,0,0)); plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1));
-legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,cex=0.75,bty='n')
+plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
+legend("top",legend=map.legend,ncol=6,fill=map.colors,title=map.title,cex=0.75,bty='n')
 ```
 **Figure 6.**	U.S. county-level SO~2~ emissions density estimates in tons/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
 
 ```{r label="Figure07-emissions-map-NOx"}
-breaks <- c(2,5,10,20)
-density <- county.data$NOx/county.data$area_km*2.59
+breaks <- c(2,5,10,20,50)
+density <- round(county.data$NOx/county.data$area_km*2.59,1)
 county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
 N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
-map.legend <- paste(c(0,breaks),"-",c((breaks-0.1),round(max(density)))," (",N,")",sep="")
+map.legend <- paste(c("0.0",sprintf("%3.1f",breaks+0.1))," - ",c(sprintf("%3.1f",breaks),
+  round(max(density)))," (",format(N,trim=TRUE,big.mark=","),")",sep="")
 map.title <- "Nitrogen Oxides Emissions Density in tons/year/mi^2 (# Counties)"
-layout(matrix(c(1,2),2,1),widths=1,heights=c(0.9,0.1))
-par(bg="gray95"); draw.map("state",proj.args=pa);
+layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa)
 for (i in 1:nrow(county.data)) {
   draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
 }
 draw.map("state",proj.args=pa,add=TRUE)
-par(mar=c(0,0,0,0)); plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1));
-legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,cex=0.75,bty='n')
+plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
+legend("top",legend=map.legend,ncol=6,fill=map.colors,title=map.title,cex=0.75,bty='n')
 ```
 **Figure 7.**	U.S. county-level NO~x~ emissions density estimates in tons/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
 
@@ -284,14 +292,14 @@ trend.border <- c("chocolate","gray50","red","green4","blue")
 trend.colors <- c("wheat","gray90","lightpink","lightgreen","lightblue")
 
 layout(mat=matrix(c(1,3,5,2,4,5),nrow=3,ncol=2),widths=c(0.5,0.5),heights=c(0.45,0.45,0.1))
-par(mar=c(5,5,1,1),mgp=c(3.5,0.7,0),las=2)
+par(mar=c(5,5,1,1),mgp=c(3.5,0.7,0),las=2,bg="gray95")
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xaxs='i',xlim=c(2002,curr.year),
   xlab="Inventory Year",yaxs='i',ylim=c(0,6000),ylab="Primary PM2.5 Emissions (kTons/year)")
 axis(side=1,at=seq(2002,curr.year,3),labels=seq(2002,curr.year,3))
 axis(side=2,at=seq(0,6000,1000),labels=seq(0,6000,1000))
 polygon(x=c(2002,rep(curr.year,2),2002),y=c(0,0,6000,6000),col="gray80")
 abline(h=seq(500,6000,500),v=trend.years,col="white")
-text(x=curr.year,y=5500,labels="A) Primary PM2.5",pos=2,cex=2)
+text(x=curr.year,y=5500,labels="A) Primary PM2.5",pos=2,cex=1.5)
 polygon(x=c(trend.years,rev(trend.years)),y=c(pm25.trends[1,],rep(0,ny)),
   col=trend.colors[2],border=trend.colors[2])
 for (i in 2:nrow(pm25.trends)) {
@@ -306,7 +314,7 @@ axis(side=1,at=seq(2002,curr.year,3),labels=seq(2002,curr.year,3))
 axis(side=2,at=seq(0,20000,2000),labels=seq(0,20000,2000))
 polygon(x=c(2002,rep(curr.year,2),2002),y=c(0,0,20000,20000),col="gray80")
 abline(h=seq(1000,19000,1000),v=trend.years,col="white")
-text(x=curr.year,y=18500,labels="B) Primary PM10",pos=2,cex=2)
+text(x=curr.year,y=18500,labels="B) Primary PM10",pos=2,cex=1.5)
 polygon(x=c(trend.years,rev(trend.years)),y=c(pm10.trends[1,],rep(0,ny)),
   col=trend.colors[2],border=trend.colors[2])
 for (i in 2:nrow(pm10.trends)) {
@@ -321,7 +329,7 @@ axis(side=1,at=seq(2002,curr.year,3),labels=seq(2002,curr.year,3))
 axis(side=2,at=seq(0,16000,2000),labels=seq(0,16000,2000))
 polygon(x=c(2002,rep(curr.year,2),2002),y=c(0,0,16000,16000),col="gray80")
 abline(h=seq(1000,15000,1000),v=trend.years,col="white")
-text(x=curr.year,y=14800,labels="C) SO2",pos=2,cex=2)
+text(x=curr.year,y=14800,labels="C) SO2",pos=2,cex=1.5)
 polygon(x=c(trend.years,rev(trend.years)),y=c(so2.trends[1,],rep(0,ny)),
   col=trend.colors[2],border=trend.colors[2])
 for (i in 2:nrow(so2.trends)) {
@@ -336,7 +344,7 @@ axis(side=1,at=seq(2002,curr.year,3),labels=seq(2002,curr.year,3))
 axis(side=2,at=seq(0,26000,4000),labels=seq(0,26000,4000))
 polygon(x=c(2002,rep(curr.year,2),2002),y=c(0,0,26000,26000),col="gray80")
 abline(h=seq(2000,24000,2000),v=trend.years,col="white")
-text(x=curr.year,y=24000,labels="D) NOx",pos=2,cex=2)
+text(x=curr.year,y=24000,labels="D) NOx",pos=2,cex=1.5)
 polygon(x=c(trend.years,rev(trend.years)),y=c(nox.trends[1,],rep(0,ny)),
   col=trend.colors[1],border=trend.colors[1])
 for (i in 2:nrow(nox.trends)) {
@@ -362,7 +370,6 @@ pm25.sites <- subset(pm25.monitors,!duplicated(substr(id,1,9)))
 pm25.fems <- subset(pm25.sites,substr(frm_code,1,2) == "EQ")
 pm10_25.sites <- subset(pm10_25.monitors,!duplicated(substr(id,1,9)))
 pm25.spec.sites <- subset(pm25.spec.monitors,!duplicated(substr(id,1,9)))
-colors <- c("gray50","blue3","yellow3","red3")
 ```
 
 |      The EPA and its partners at State, Local, and Tribal monitoring agencies manage and operate the nation's ambient air monitoring networks. The EPA provides minimum monitoring requirements for PM and other pollutants in 40 CFR Part 58. Monitoring agencies carry out and perform ambient air monitoring in accordance with the EPA's requirements and guidance. Federal Reference Methods (FRMs) and Federal Equivalence Methods (FEMs) are monitoring methods that have been approved for use by States and other monitoring organizations to assess NAAQS compliance and implementation. The FRMs for measuring PM~10~, PM~2.5~, and PM~10-2.5~ are specified in CFR 40 Part 50, Appendices J, L, and O, respectively, while performance requirements for the approval of FRM and FEMs are in 40 CFR Part 53.
@@ -380,52 +387,56 @@ colors <- c("gray50","blue3","yellow3","red3")
 |      The main network of monitors providing ambient data for use in implementation activities related to the NAAQS is the State and Local Air Monitoring Stations (SLAMS) network, which comprises about `r round(100*length(which(pm25.sites$monitor_type == "SLAMS"))/nrow(pm25.sites))`% of PM~2.5~ and `r round(100*length(which(pm10.sites$monitor_type == "SLAMS"))/nrow(pm10.sites))`% of PM~10~ monitoring sites. Two important subsets of SLAMS sites are the [National Core (NCore) multipollutant monitoring network](https://www.epa.gov/amtic/ncore-monitoring-network) and the [near-road monitoring network](https://www.epa.gov/amtic/near-road-monitoring). The NCore network was designed to collect consistent measurements of criteria pollutants for trends and NAAQS compliance purposes. NCore was fully operational as of 2011 and consists of approximately 60 urban monitoring stations and 20 rural monitoring stations. Each State is required to have at least one NCore station. PM~2.5~ monitoring was required for near-road network sites as part of the 2012 PM NAAQS review and these sites monitors were phased into the network between 2015 and 2017. Near-road sites are required in each metropolitan statistical area (MSA) with a population of 1,000,000 or greater.
 
 ```{r label="Figure09-monitor-map-PM10"}
+colors <- c("gray50","blue3","yellow3","red3","black")
 pm10.monitors$site <- substr(pm10.monitors$id,1,9)
 pm10.monitors$class <- mapply(function(type,network) ifelse(type == "INDUSTRIAL","INDUSTRIAL",
-  ifelse(network == "NCORE","NCORE",ifelse(type == "SLAMS","SLAMS","SPM/OTHER"))),
+  ifelse(network %in% c("NCORE","NATTS","PROPOSED NCORE"),"NCORE/NATTS",ifelse(type == "SLAMS",
+  "SLAMS",ifelse(type == "TRIBAL","TRIBAL","SPM/OTHER")))),
   pm10.monitors$monitor_type,pm10.monitors$network)
-t <- ddply(pm10.monitors,"site",summarize,latitude=as.numeric(latitude[1]),
-  longitude=as.numeric(longitude[1]),class=min(class))
+t <- ddply(pm10.monitors,"site",summarize,latitude=latitude[1],longitude=longitude[1],class=min(class))
 t$color <- sapply(substr(t$class,1,2),function(x) switch(x,
-  IN=colors[3],NC=colors[2],SL=colors[1],colors[4]))
+  IN=colors[3],NC=colors[2],SL=colors[1],TR=colors[5],colors[4]))
+t$pch <- sapply(substr(t$class,1,2),function(x) switch(x,IN=23,NC=22,SL=21,TR=25,24))
 t <- t[order(t$class,t$site,decreasing=TRUE),]
-N <- table(t$class)[c(3,2,1,4)]
+N <- table(t$class)[c(3,2,1,4,5)]
 legend.lab <- paste(names(N)," (",N,")",sep="")
 
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="grey95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 for (i in 1:nrow(t)) {
   add.layer(type="points",x=t$longitude[i],y=t$latitude[i],
-    proj.args=pa,bg=t$color[i],pch=21)
+    proj.args=pa,bg=t$color[i],pch=t$pch[i])
 }
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("bottom",legend=legend.lab,pt.bg=colors,pch=21,cex=0.75,
-  pt.cex=1.25,bty='n',ncol=4,title="Monitoring Network (# Sites)")
+legend("bottom",legend=legend.lab,pt.bg=colors,pch=c(21:25),cex=0.75,
+  pt.cex=1.25,bty='n',ncol=5,title="Monitoring Network (# Sites)")
 ```
 **Figure 9:** Map of U.S. PM~10~ monitoring sites reporting data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
 
 ```{r label="Figure10-monitor-map-PM25"}
 pm25.monitors$site <- substr(pm25.monitors$id,1,9)
 pm25.monitors$class <- mapply(function(type,network) ifelse(network == "NEAR ROAD","NEAR ROAD",
-  ifelse(network == "NCORE","NCORE",ifelse(type == "SLAMS","SLAMS","SPM/OTHER"))),
-  pm25.monitors$monitor_type,pm25.monitors$network)
-t <- ddply(pm25.monitors,"site",summarize,latitude=as.numeric(latitude[1]),
-  longitude=as.numeric(longitude[1]),class=min(class))
+  ifelse(network == "NCORE","NCORE",ifelse(type == "SLAMS","SLAMS",ifelse(type == "TRIBAL",
+  "TRIBAL","SPM/OTHER")))),pm25.monitors$monitor_type,pm25.monitors$network)
+t <- ddply(pm25.monitors,"site",summarize,latitude=latitude[1],longitude=longitude[1],class=min(class))
 t$color <- sapply(substr(t$class,1,2),function(x) switch(x,
-  NE=colors[3],NC=colors[2],SL=colors[1],colors[4]))
+  NE=colors[3],NC=colors[2],SL=colors[1],TR=colors[5],colors[4]))
+t$pch <- sapply(substr(t$class,1,2),function(x) switch(x,NE=23,NC=22,SL=21,TR=25,24))
 t <- t[order(t$class,t$site,decreasing=TRUE),]
-N <- table(t$class)[c(3,1,2,4)]
+N <- table(t$class)[c(3,1,2,4,5)]
 legend.lab <- paste(names(N)," (",N,")",sep="")
 
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="grey95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 for (i in 1:nrow(t)) {
   add.layer(type="points",x=t$longitude[i],y=t$latitude[i],
-    proj.args=pa,bg=t$color[i],pch=21)
+    proj.args=pa,bg=t$color[i],pch=t$pch[i])
 }
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("bottom",legend=legend.lab,pt.bg=colors,pch=21,cex=0.75,
-  pt.cex=1.25,bty='n',ncol=4,title="Monitoring Network (# Sites)")
+legend("bottom",legend=legend.lab,pt.bg=colors,pch=c(21:25),cex=0.75,
+  pt.cex=1.25,bty='n',ncol=5,title="Monitoring Network (# Sites)")
 ```
 **Figure 10:** Map of U.S. PM~2.5~ monitoring sites reporting data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
 
@@ -440,50 +451,52 @@ legend("bottom",legend=legend.lab,pt.bg=colors,pch=21,cex=0.75,
 ```{r label="Figure11-monitor-map-PM25spec"}
 pm25.spec.monitors <- subset(pm25.spec.monitors,parameter == "88403")
 pm25.spec.monitors$site <- substr(pm25.spec.monitors$id,1,9)
-pm25.spec.monitors$class <- sapply(pm25.spec.monitors$network,function(x) ifelse(grepl("CSN",x),"CSN",
-  ifelse(grepl("IMPROVE",x),"IMPROVE","OTHER")))
-t <- ddply(pm25.spec.monitors,"site",summarize,latitude=as.numeric(latitude[1]),
-   longitude=as.numeric(longitude[1]),class=min(class))
+pm25.spec.monitors$class <- sapply(pm25.spec.monitors$network,function(x)
+  ifelse(grepl("CSN",x),"CSN",ifelse(grepl("IMPROVE",x),"IMPROVE","OTHER")))
+t <- ddply(pm25.spec.monitors,"site",summarize,latitude=latitude[1],longitude=longitude[1],class=min(class))
 t$color <- sapply(substr(t$class,1,1),function(x) switch(x,
   C=colors[1],I=colors[2],colors[4]))
+t$pch <- sapply(substr(t$class,1,1),function(x) switch(x,C=21,I=22,24))
 t <- t[order(t$class,t$site,decreasing=TRUE),]
 N <- table(t$class)
 legend.lab <- paste(names(N)," (",N,")",sep="")
 
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="grey95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 for (i in 1:nrow(t)) {
   add.layer(type="points",x=t$longitude[i],y=t$latitude[i],
-    proj.args=pa,bg=t$color[i],pch=21)
+    proj.args=pa,bg=t$color[i],pch=t$pch[i])
 }
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("bottom",legend=legend.lab,pt.bg=colors[c(1,2,4)],pch=21,cex=0.75,
-  pt.cex=1.25,bty='n',ncol=3,title="Monitoring Network (# Sites)")
+legend("bottom",legend=legend.lab,pt.bg=colors[c(1,2,4)],pch=c(21,22,24),
+  cex=0.75,pt.cex=1.25,bty='n',ncol=3,title="Monitoring Network (# Sites)")
 ```
 **Figure 11:** Map of U.S. PM~2.5~ speciation monitoring sites reporting data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
 
 ```{r label="Figure12-monitor-map-PM10_25"}
 pm10_25.monitors$site <- substr(pm10_25.monitors$id,1,9)
 pm10_25.monitors$class <- mapply(function(type,network) ifelse(network == "IMPROVE","IMPROVE",
-  ifelse(grepl("NCORE",network),"NCORE",ifelse(type == "SLAMS","SLAMS","SPM/OTHER"))),
-  pm10_25.monitors$monitor_type,pm10_25.monitors$network)
-t <- ddply(pm10_25.monitors,"site",summarize,latitude=as.numeric(latitude[1]),
-  longitude=as.numeric(longitude[1]),class=min(class))
+  ifelse(grepl("NCORE",network),"NCORE",ifelse(type == "SLAMS","SLAMS",ifelse(type == "TRIBAL",
+  "TRIBAL","SPM/OTHER")))),pm10_25.monitors$monitor_type,pm10_25.monitors$network)
+t <- ddply(pm10_25.monitors,"site",summarize,latitude=latitude[1],longitude=longitude[1],class=min(class))
 t$color <- sapply(substr(t$class,1,2),function(x) switch(x,
-  SL=colors[3],IM=colors[1],NC=colors[2],colors[4]))
+  SL=colors[3],IM=colors[1],NC=colors[2],TR=colors[5],colors[4]))
+t$pch <- sapply(substr(t$class,1,2),function(x) switch(x,IM=21,NC=22,SL=23,TR=25,24))
 t <- t[order(t$class,t$site,decreasing=TRUE),]
 N <- table(t$class)
 legend.lab <- paste(names(N)," (",N,")",sep="")
 
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="grey95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 for (i in 1:nrow(t)) {
   add.layer(type="points",x=t$longitude[i],y=t$latitude[i],
-    proj.args=pa,bg=t$color[i],pch=21)
+    proj.args=pa,bg=t$color[i],pch=t$pch[i])
 }
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("bottom",legend=legend.lab,pt.bg=colors,pch=21,cex=0.75,
-  pt.cex=1.25,bty='n',ncol=4,title="Monitoring Network (# Sites)")
+legend("bottom",legend=legend.lab,pt.bg=colors,pch=c(21:25),cex=0.75,
+  pt.cex=1.25,bty='n',ncol=5,title="Monitoring Network (# Sites)")
 ```
 **Figure 12:** Map of U.S. PM~10-2.5~ monitoring sites reporting data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
 
@@ -573,14 +586,16 @@ N.sites = number of sites; N.obs = number of observations; SD = standard deviati
 dvs.pm25.ann <- subset(pm25.dvs,year == curr.year & dv_ann_valid == "Y",
   c("site","latitude","longitude","year","dv_ann"))
 vals <- dvs.pm25.ann$dv_ann; o <- order(vals); ny1 <- length(unique(pm25.dvs$year));
-colors <- c("blue3","cyan3","yellow3","orange3","red3","purple3"); bins <- c(5.1,7.1,9.1,12.1,15.1); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(5.1,7.1,9.1,12.1,15.1); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-0.1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-0.1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",sprintf("%4.1f",bin.max)," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.pm25.ann$longitude[o],y=dvs.pm25.ann$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -593,14 +608,16 @@ legend("bottom",legend=legend.lab[keep],pch=21,col="black",
 dvs.pm25.24hr <- subset(pm25.dvs,year == curr.year & dv_24h_valid == "Y",
   c("site","latitude","longitude","year","dv_24h"))
 vals <- dvs.pm25.24hr$dv_24h; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3","purple3"); bins <- c(16,26,36,51,101); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(16,26,36,51,101); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.pm25.24hr$longitude[o],y=dvs.pm25.24hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -613,14 +630,16 @@ legend("bottom",legend=legend.lab[keep],pch=21,col="black",
 dvs.pm10.24hr <- subset(pm10.dvs,year == curr.year & dv_valid == "Y",
   c("site","latitude","longitude","year","dv_conc"))
 vals <- dvs.pm10.24hr$dv_conc; o <- order(vals); ny2 <- length(unique(pm10.dvs$year));
-colors <- c("blue3","cyan3","yellow3","orange3","red3","purple3"); bins <- c(51,101,151,201,501); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(51,101,151,201,501); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.pm10.24hr$longitude[o],y=dvs.pm10.24hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -635,14 +654,16 @@ t <- subset(ddply(pm10_25,c("site","year"),summarize,latitude=as.numeric(latitud
 map.vals <- ddply(t,c("site"),summarize,latitude=as.numeric(latitude[1]),
   longitude=as.numeric(longitude[1]),pm10_25=mean(pm10_25))
 vals <- map.vals$pm10_25; o <- order(vals); ny3 <- length(unique(pm10_25$year));
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(2,4,6,10); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(3.1,6.1,10.1,20.1,50.1);  
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
-bin.min <- c(0,bins); bin.max <- c(bins-0.1,round(max(vals)));
+bin.min <- c(round(min(vals),1),bins); bin.max <- c(bins-0.1,round(max(vals),1));
 N <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(N > 0);
-legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",N," sites)",sep="")
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.1f",bin.min)," - ",sprintf("%4.1f",bin.max)," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=map.vals$longitude[o],y=map.vals$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -674,10 +695,10 @@ pt.col <- c("#0000FFFF","#AAAAFFFF","#FFFFFFFF","#FFAAAAFF","#FF0000FF")
 pt.cex <- c(1.25,1,0.75,1,1.25); pt.pch <- c(25,25,21,24,24);
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=pm25.site.dvs.ann$longitude[r],y=pm25.site.dvs.ann$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=0.75,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -693,10 +714,10 @@ cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
 ind <- as.integer(names(table(cat))); r <- order(abs(pm25.site.dvs.24h$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.15))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=pm25.site.dvs.24h$longitude[r],y=pm25.site.dvs.24h$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=0.75,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -712,10 +733,10 @@ cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
 ind <- as.integer(names(table(cat))); r <- order(abs(pm10.site.dvs.24h$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.15))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=pm10.site.dvs.24h$longitude[r],y=pm10.site.dvs.24h$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=0.75,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -731,10 +752,10 @@ cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
 ind <- as.integer(names(table(cat))); r <- order(abs(pm10_25.site.avg$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.15))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=pm10_25.site.avg$longitude[r],y=pm10_25.site.avg$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=0.75,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -744,12 +765,12 @@ legend("bottom",legend=legend.txt,bty='n',cex=0.75,col="black",
 ```{r label="Figure21-national-trends-PM25"}
 pm25.trend.dvs.ann <- apply(pm25.site.dvs.ann[,-c(1:3)],2,quantile,probs=c(0.1,0.5,0.9),na.rm=TRUE)
 pm25.trend.dvs.24h <- apply(pm25.site.dvs.24h[,-c(1:3)],2,quantile,probs=c(0.1,0.5,0.9),na.rm=TRUE)
-par(mar=c(3,3,0.5,0.5),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,0.5),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(2001.5,curr.year+0.5),
-  xlab="",yaxs='i',ylim=c(0,50),ylab="PM2.5 Design Value (ug/m^3)",main="")
+  xlab="",yaxs='i',ylim=c(0,55),ylab="PM2.5 Design Value (ug/m^3)",main="")
 axis(side=1,at=c(2002:curr.year),labels=c(2002:curr.year),las=2)
-polygon(x=c(2001.5,rep(curr.year+0.5,2),2001.5),y=c(0,0,50,50),col="gray80")
-abline(h=seq(5,45,5),v=c(2002:curr.year),col="white")
+polygon(x=c(2001.5,rep(curr.year+0.5,2),2001.5),y=c(0,0,55,55),col="gray80")
+abline(h=seq(5,50,5),v=c(2002:curr.year),col="white")
 lines(x=c(2002:curr.year),y=pm25.trend.dvs.ann[1,1:ny1],lty=2,lwd=1.5,col="orange3")
 lines(x=c(2002:curr.year),y=pm25.trend.dvs.ann[2,1:ny1],lty=1,lwd=1.5,col="orange3")
 lines(x=c(2002:curr.year),y=pm25.trend.dvs.ann[3,1:ny1],lty=2,lwd=1.5,col="orange3")
@@ -765,7 +786,7 @@ legend("topright",legend=c("10th/90th Percentile Annual DV","Median Annual DV",
 
 ```{r label="Figure22-national-trends-PM10"}
 pm10.trend.dvs.24h <- apply(pm10.site.dvs.24h[,-c(1:3)],2,quantile,probs=c(0.1,0.5,0.9),na.rm=TRUE)
-par(mar=c(3,3,0.5,0.5),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,0.5),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(0,250),ylab="PM10 Design Concentration (ug/m^3)",main="")
 axis(side=1,at=c(2000:curr.year),labels=c(2000:curr.year),las=2)
@@ -775,7 +796,7 @@ lines(x=c(2000:curr.year),y=pm10.trend.dvs.24h[1,1:ny2],lty=2,lwd=1.5,col="steel
 lines(x=c(2000:curr.year),y=pm10.trend.dvs.24h[2,1:ny2],lty=1,lwd=1.5,col="steelblue")
 lines(x=c(2000:curr.year),y=pm10.trend.dvs.24h[3,1:ny2],lty=2,lwd=1.5,col="steelblue")
 abline(h=150,lty=2,lwd=1.5,col="black"); box();
-legend("topright",legend=c("10th/90th Percentile PM10 DC","Median PM10 DC","PM10 NAAQS Level"),
+legend("topleft",legend=c("10th/90th Percentile PM10 DC","Median PM10 DC","PM10 NAAQS Level"),
   lty=c(2,1,2),col=c(rep("steelblue",2),"black"),bty='n',lwd=1.5,cex=0.75)
 ```
 **Figure 22:** National trend in 24-hour PM~10~ design concentrations in $\mu$g/m^3^, 2000 to `r params$curr.year`. **Source:** [AQS](https://www.epa.gov/aqs).
@@ -789,7 +810,7 @@ legend("topright",legend=c("10th/90th Percentile PM10 DC","Median PM10 DC","PM10
 ```{r label="Figure23-conc-boxplots-pm25-annual"}
 pm25.stats <- tapply(pm25.annual$conc.ann,list(pm25.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(pm25.annual$year); years <- c(2000:curr.year);
-par(mar=c(3,3,1,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,50),ylab="Annual Average PM2.5 Concentration (ug/m^3)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -811,7 +832,7 @@ legend("topleft",legend=c("Number of PM2.5 Sites","PM2.5 NAAQS Level"),
 ```{r label="Figure24-conc-boxplots-pm25-daily",fig.height=4.15}
 pm25.stats <- tapply(pm25.annual$conc.24h,list(pm25.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(pm25.annual$year); years <- c(2000:curr.year);
-par(mar=c(3,3,1,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,250),ylab="Annual 98th Percentile 24-hour PM2.5 Concentration (ug/m^3)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -833,7 +854,7 @@ legend("topleft",legend=c("Number of PM2.5 Sites","PM2.5 NAAQS Level"),
 ```{r label="Figure25-conc-boxplots-pm10",fig.height=4.15}
 pm10.stats <- tapply(log10(pm10.annual$conc),list(pm10.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(pm10.annual$year); years <- c(1990:curr.year);
-par(mar=c(3,3,1,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1989.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,4),ylab="Annual 2nd Highest 24-hour PM10 Concentration (ug/m^3)",main="")
 yaxs.labs <- c(1,2,5,10,20,50,100,200,500,1000,2000,5000,10000)
@@ -871,7 +892,8 @@ kbl(pm.table4[,-2],booktabs=TRUE,format.args=list(big.mark=",")) %>% kable_styli
 N.sites = number of sites; N.obs = number of observations; SD = standard deviation; min = minimum; p1, p5, p10, p25, p50, p90, p95, p98, p99 = 1st, 5th, 10th, 25th, 50th, 90th, 95th, 98th, 99th percentiles; max = maximum; max.site = AQS ID number for the monitoring site corresponding to the observation in the max column.
 1st quarter = January/February/March; 2nd quarter = April/May/June; 3rd quarter = July/August/September; 4th quarter = October/November/December.
 
-```{r label="Figure26-species-piecharts",fig.width=10,fig.height=5,fig.align="center"}
+```{r label="Figure26-species-piecharts",fig.width=10,fig.height=6,fig.align="center"}
+## Calculate means and percent contributions for each site
 daily <- na.omit(ddply(pm25.spec.daily,c("site","date"),summarize,no3=max.na(no3),oc=max.na(oc),
   ec=max.na(ec),so4=max.na(so4),crustal=max.na(crustal),seasalt=max.na(seasalt)))
 daily$total <- apply(daily[-c(1:2)],1,sum)
@@ -879,76 +901,60 @@ vals <- subset(ddply(daily,"site",summarize,obs=length(date),total=mean(total),n
   oc=mean(oc),ec=mean(ec),so4=mean(so4),crustal=mean(crustal),seasalt=mean(seasalt)),obs >= 200)
 pcts <- data.frame(site=vals$site,t(apply(vals[,-c(1:3)],1,function(x) round(100*x/sum(x),1))))
 pm25.spec.monitors$site <- substr(pm25.spec.monitors$id,1,9)
-pm25.spec.monitors$type <- sapply(pm25.spec.monitors$network,function(x) ifelse(x == "NCORE","NCORE",
-  ifelse(grepl("CSN",x),"CSN",ifelse(x == "IMPROVE","IMPROVE","OTHER"))))
-pm25.spec.monitors$rank <- sapply(pm25.spec.monitors$type,switch,NCORE=1,CSN=2,IMPROVE=3,OTHER=4)
-pm25.spec.monitors <- pm25.spec.monitors[order(pm25.spec.monitors$site,pm25.spec.monitors$rank),]
+pm25.spec.monitors$type <- sapply(pm25.spec.monitors$network,function(x) 
+  ifelse(grepl("CSN",x),"CSN",ifelse(x == "IMPROVE","IMPROVE","OTHER")))
+pm25.spec.monitors <- pm25.spec.monitors[order(pm25.spec.monitors$site,pm25.spec.monitors$type),]
 sites <- subset(pm25.spec.monitors,!duplicated(site),c("site","site_name","state_name","county_name",
   "cbsa_name","type","latitude","longitude"))
-class(sites$latitude) <- class(sites$longitude) <- "numeric"
 map.vals <- merge(sites,merge(vals[,c("site","total")],pcts,by="site"),by="site")
+map.vals <- map.vals[order(map.vals$total,decreasing=TRUE),]
 pie.colors <- c("#FFFF00","#FF0000","#00FFFF","#000000","#A52A2A","#0000FF")
 
-## Add pie charts for CSN/NCore sites in urban areas (in a CBSA)
-urban <- subset(map.vals,type %in% c("CSN","NCORE") & cbsa_name != " ")
-keep <- ddply(urban,"cbsa_name",summarize,site=site[which.max(total)])
-urban <- subset(urban,site %in% keep$site)
-urban <- urban[order(urban$total),]
-draw.map("state",col="gray95")
-for (i in 1:nrow(urban)) {
-  if (urban$state_name[i] == "Alaska") {
-    urban$longitude[i] <- scale(urban$longitude[i],186,3)
-    urban$latitude[i] <- scale(urban$latitude[i],-21,3)
+## Remove sites with lower mean concentrations so that pies do not overlap
+xy <- add.layer(type="points",x=map.vals$longitude,y=map.vals$latitude,plot=FALSE,proj.args=pa)
+d <- rdist(xy); map.vals$x <- xy$x; map.vals$y <- xy$y;
+n <- 1; nr <- nrow(map.vals); 
+while(n <= nr) {
+  cut <- 0.02
+  rm <- which(d[,n] > 0 & d[,n] < cut)
+  if (length(rm) > 0) {
+    map.vals <- map.vals[-rm,]
+    nr <- nr - length(rm)
+    d <- d[-rm,-rm]
   }
-  if (urban$state_name[i] == "Hawaii") {
-    urban$longitude[i] <- scale(urban$longitude[i],-65,1)
-    urban$latitude[i] <- scale(urban$latitude[i],-6,1)
-  }
-  pie.chart(x=unlist(urban[i,c("so4","no3","oc","ec","crustal","seasalt")]),labels="",
-    radius=0.5,add=TRUE,x.ctr=urban$longitude[i],y.ctr=urban$latitude[i],col=pie.colors)
+  n <- n + 1
 }
 
-## Add pie chart for IMPROVE sites based on distance from other sites to avoid overlap
-keep <- urban; rural <- subset(map.vals,type == "IMPROVE"); max.dist <- 100;
-while(max.dist > 1) {
-  dist <- rdist(rural[,c("longitude","latitude")],keep[,c("longitude","latitude")])
-  min.dist <- apply(dist,1,min); site.add <- which.max(min.dist);
-  keep <- rbind(keep,rural[site.add,]); rural <- rural[-c(site.add),];
-  max.dist <- max(min.dist);
+## Generate map with PM2.5 speciation piecharts for each location
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
+for (i in 1:nrow(map.vals)) {
+  pie.chart(x=unlist(map.vals[i,c("so4","no3","oc","ec","crustal","seasalt")]),labels="",
+    radius=0.01,add=TRUE,x.ctr=map.vals$x[i],y.ctr=map.vals$y[i],col=pie.colors)
 }
-keep <- keep[order(keep$total),]
-for (i in 1:nrow(keep)) {
-  if (keep$state_name[i] == "Alaska") {
-    keep$longitude[i] <- scale(keep$longitude[i],186,3)
-    keep$latitude[i] <- scale(keep$latitude[i],-21,3)
-  }
-  if (keep$state_name[i] == "Hawaii") {
-    keep$longitude[i] <- scale(keep$longitude[i],-65,1)
-    keep$latitude[i] <- scale(keep$latitude[i],-6,1)
-  }
-  pie.chart(x=unlist(keep[i,c("so4","no3","oc","ec","crustal","seasalt")]),labels="",
-    radius=0.5,add=TRUE,x.ctr=keep$longitude[i],y.ctr=keep$latitude[i],col=pie.colors)
-}
-## Add legend pie chart in bottom right corner
 pie.chart(x=rep(1,6),labels=c("Sulfates","Nitrates","OC","EC","Crustal","Sea Salt"),
-  radius=2,add=TRUE,x.ctr=-73,y.ctr=30,col=pie.colors,cex=0.75)
+  radius=0.02,add=TRUE,x.ctr=0.34,y.ctr=-1.35,col=pie.colors,cex=0.75)
 ```
+\vspace{-5truemm}
 **Figure 26:** Map showing pie charts of PM~2.5~ component species at selected U.S. monitoring sites based on `r params$curr.year-2`-`r params$curr.year` data. **Source:** [AQS](https://www.epa.gov/aqs).
 
-```{r label="27-species-avgconc",fig.width=10,fig.height=7,fig.align="center"}
-pm25.spec.vals <- subset(ddply(pm25.spec,c("site","year"),summarize,latitude=as.numeric(latitude[1]),
-  longitude=as.numeric(longitude[1]),so4=max.na(so4),no3=max.na(no3),ec=max.na(ec),oc=max.na(oc)),year >= curr.year-2)
+```{r label="Figure27-species-avgconc",fig.width=10,fig.height=7,fig.align="center"}
+pm25.spec.vals <- ddply(subset(pm25.spec,year >= curr.year-2),c("site","year"),summarize,latitude=latitude[1],
+  longitude=longitude[1],so4=max.na(so4),no3=max.na(no3),ec=max.na(ec),oc=max.na(oc))
 layout(mat=matrix(c(1:8),4,2),width=c(1,1),height=c(1,0.1,1,0.1))
 
-## Sulfate average concentration map
+## Annual average sulfate (SO4) concentration map
 map.vals <- na.omit(ddply(pm25.spec.vals,"site",summarize,latitude=latitude[1],longitude=longitude[1],so4=mean(so4)))
 vals <- map.vals$so4; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(0.5,1,1.5,2); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(0.51,1.01,1.51,2.01,3.01);
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
-bin.min <- c(0,bins); bin.max <- c(bins-0.01,round(max(vals),2));
-n.sites <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(n.sites > 0);
-legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",n.sites," sites)",sep="")
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+bin.min <- c(round(min(vals),2),bins); bin.max <- c(bins-0.01,round(max(vals),2));
+N <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.2f",bin.min)," - ",sprintf("%4.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
+if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=map.vals$longitude[o],y=map.vals$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 text(x=(par("usr")[2]+par("usr")[1])/2,y=par("usr")[4],labels="Sulfates",pos=1,cex=1.5)
@@ -959,12 +965,15 @@ legend("bottom",legend=legend.lab[keep],pch=21,col="black",
 ## Nitrate average concentration map
 map.vals <- na.omit(ddply(pm25.spec.vals,"site",summarize,latitude=latitude[1],longitude=longitude[1],no3=mean(no3)))
 vals <- map.vals$no3; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(0.5,1,1.5,2); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(0.51,1.01,1.51,2.01,3.01);
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
-bin.min <- c(0,bins); bin.max <- c(bins-0.01,round(max(vals),2));
-n.sites <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(n.sites > 0);
-legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",n.sites," sites)",sep="")
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+bin.min <- c(round(min(vals),2),bins); bin.max <- c(bins-0.01,round(max(vals),2));
+N <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.2f",bin.min)," - ",sprintf("%4.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
+if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=map.vals$longitude[o],y=map.vals$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 text(x=(par("usr")[2]+par("usr")[1])/2,y=par("usr")[4],labels="Nitrates",pos=1,cex=1.5)
@@ -975,12 +984,15 @@ legend("bottom",legend=legend.lab[keep],pch=21,col="black",
 ## EC average concentration map
 map.vals <- na.omit(ddply(pm25.spec.vals,"site",summarize,latitude=latitude[1],longitude=longitude[1],ec=mean(ec)))
 vals <- map.vals$ec; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(0.25,0.5,0.75,1); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(0.26,0.51,0.76,1.01,1.51); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
-bin.min <- c(0,bins); bin.max <- c(bins-0.01,round(max(vals),2));
-n.sites <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(n.sites > 0);
-legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",n.sites," sites)",sep="")
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+bin.min <- c(round(min(vals),2),bins); bin.max <- c(bins-0.01,round(max(vals),2));
+N <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.2f",bin.min)," - ",sprintf("%4.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
+if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=map.vals$longitude[o],y=map.vals$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 text(x=(par("usr")[2]+par("usr")[1])/2,y=par("usr")[4],labels="EC",pos=1,cex=1.5)
@@ -991,12 +1003,15 @@ legend("bottom",legend=legend.lab[keep],pch=21,col="black",
 ## OC average concentration map
 map.vals <- na.omit(ddply(pm25.spec.vals,"site",summarize,latitude=latitude[1],longitude=longitude[1],oc=mean(oc)))
 vals <- map.vals$oc; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(1,2,3,4); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(1.01,2.01,3.01,4.01,6.01); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
-bin.min <- c(0,bins); bin.max <- c(bins-0.01,round(max(vals),2));
-n.sites <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(n.sites > 0);
-legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",n.sites," sites)",sep="")
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+bin.min <- c(round(min(vals),2),bins); bin.max <- c(bins-0.01,round(max(vals),2));
+N <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.2f",bin.min)," - ",sprintf("%4.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
+if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=map.vals$longitude[o],y=map.vals$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 text(x=(par("usr")[2]+par("usr")[1])/2,y=par("usr")[4],labels="OC",pos=1,cex=1.5)
@@ -1004,9 +1019,10 @@ plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.lab[keep],pch=21,col="black",
   pt.bg=colors[keep],cex=0.75,pt.cex=1.25,bty='n',ncol=3)
 ```
+\vspace{-5truemm}
 **Figure 27:** Average concentrations for sulfate (top left), nitrate (bottom left), elemental carbon (top right), and organic carbon (bottom right) at U.S. monitoring sites based on `r params$curr.year-2`-`r params$curr.year` data. **Source:** [AQS](https://www.epa.gov/aqs).
 
-```{r label="28-species-trends",fig.width=10,fig.height=7,fig.align="center"}
+```{r label="Figure28-species-trends",fig.width=10,fig.height=7,fig.align="center"}
 layout(mat=matrix(c(1:8),4,2),width=c(1,1),height=c(1,0.1,1,0.1))
 pt.col <- c("#0000FFFF","#AAAAFFFF","#FFFFFFFF","#FFAAAAFF","#FF0000FF")
 pt.cex <- c(1.25,1,0.75,1,1.25); pt.pch <- c(25,25,21,24,24);
@@ -1019,7 +1035,8 @@ cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
   pval=so4.site.avg$pval,slope=so4.site.avg$slope)
 ind <- as.integer(names(table(cat))); r <- order(abs(so4.site.avg$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=so4.site.avg$longitude[r],y=so4.site.avg$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
 text(x=(par("usr")[2]+par("usr")[1])/2,y=par("usr")[4],labels="Sulfates",pos=1,cex=1.5)
@@ -1034,7 +1051,8 @@ cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
   pval=no3.site.avg$pval,slope=no3.site.avg$slope)
 ind <- as.integer(names(table(cat))); r <- order(abs(no3.site.avg$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=no3.site.avg$longitude[r],y=no3.site.avg$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
 text(x=(par("usr")[2]+par("usr")[1])/2,y=par("usr")[4],labels="Nitrates",pos=1,cex=1.5)
@@ -1049,7 +1067,8 @@ cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
   pval=ec.site.avg$pval,slope=ec.site.avg$slope)
 ind <- as.integer(names(table(cat))); r <- order(abs(ec.site.avg$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=ec.site.avg$longitude[r],y=ec.site.avg$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
 text(x=(par("usr")[2]+par("usr")[1])/2,y=par("usr")[4],labels="EC",pos=1,cex=1.5)
@@ -1064,7 +1083,8 @@ cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
   pval=oc.site.avg$pval,slope=oc.site.avg$slope)
 ind <- as.integer(names(table(cat))); r <- order(abs(oc.site.avg$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=oc.site.avg$longitude[r],y=oc.site.avg$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
 text(x=(par("usr")[2]+par("usr")[1])/2,y=par("usr")[4],labels="OC",pos=1,cex=1.5)
@@ -1073,7 +1093,8 @@ plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=0.75,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
 ```
-**Figure 28:** Site-level trends in annual average concentrations for sulfate (top left), nitrate (bottom left), elemental carbon (top right), and organic carbon (bottom right)  based on data from 2006 through `r params$curr.year`. **Source:** [AQS](https://www.epa.gov/aqs), trends computed using R statistical software.
+\vspace{-5truemm}
+**Figure 28:** Site-level trends in annual average concentrations for sulfate (top left), nitrate (bottom left), elemental carbon (top right), and organic carbon (bottom right) based on data from 2006 through `r params$curr.year`. **Source:** [AQS](https://www.epa.gov/aqs), trends computed using R statistical software.
 
 \elandscape
 \newpage

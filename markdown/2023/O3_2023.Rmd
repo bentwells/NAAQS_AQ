@@ -108,8 +108,8 @@ voc.df$emis[5] <- sum(sector.data$VOC[grep("Industrial Processes",sector.data$se
 voc.df$emis[6] <- sum(sector.data$VOC[grep("Mobile - ",sector.data$sector)])
 voc.df$emis[7] <- sum(sector.data$VOC,na.rm=TRUE)-sum(voc.df$emis[1:6])
 voc.df$pct <- 100*voc.df$emis/sum(voc.df$emis)
-voc.labels <- paste(c("Biogenics","Wildfires","Agricultural & Prescribed Fires",
-  "Solvent Utilization","Industrial\nProcesses","Mobile\nSources","Other"),
+voc.labels <- paste(c("Biogenics","Wildfires","\nAgricultural &\nPrescribed Fires",
+  "Solvent\nUtilization","Industrial\nProcesses","Mobile\nSources","Other"),
   " ",round(voc.df$pct),"%",sep="")
 voc.title <- paste("B) VOCs (",format(round(sum(voc.df$emis/1000)),big.mark=",")," kTon/yr)",sep="")
 
@@ -141,63 +141,63 @@ pie.chart(x=ch4.df$emis,labels=ch4.labels,main=ch4.title,col=pie.colors,radius=1
 |      It should be noted that O~3~ levels in a given area are impacted by both local emissions of precursors that form O~3~ in the area as well as remote emissions of precursors that form O~3~ which is then transported into the area. Biogenic VOC emissions that lead to O~3~ formation may vary greatly depending on the type and amount of vegetation, which is generally much lower in urban areas than in rural areas. However, biogenic VOC emissions that are upwind of an urban area can have a significant impact on urban O~3~ levels. Thus, while the county-level maps shown in Figure 2, Figure 3 and Figure 4 illustrate the variability in precursor emissions in the U.S., it is not sufficient to look only at the patterns in local emissions when considering the impact on O~3~ concentrations.
 
 ```{r label="Figure02-emissions-map-CO"}
-map.colors <- c("#EFF3FF","#BDD7E7","#6BAED6","#3182BD","#08519C")
-breaks <- c(20,50,100,200)
-density <- county.data$CO/county.data$area_km*2.59
+map.colors <- c("#FFFFCC","#C7E9B4","#7FCDBB","#41B6C4","#2C7FB8","#253494") 
+breaks <- c(20,50,100,200,500)
+density <- round(county.data$CO/county.data$area_km*2.59)
 county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
 N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
-map.legend <- paste(c(0,breaks),"-",c((breaks-0.1),round(max(density)))," (",N,")",sep="")
+map.legend <- paste(c(0,breaks+1)," - ",c((breaks),format(round(max(density)),big.mark=",")),
+  " (",format(N,trim=TRUE,big.mark=","),")",sep="")
 map.title <- "Carbon Monoxide Emissions Density in tons/year/mi^2 (# Counties)"
-layout(matrix(c(1,2),2,1),widths=1,heights=c(0.9,0.1))
-par(bg="gray95")
+layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+par(mar=c(0,0,0,0),bg="gray95")
 draw.map("state",proj.args=pa)
 for (i in 1:nrow(county.data)) {
   draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
 }
 draw.map("state",proj.args=pa,add=TRUE)
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,cex=0.75,bty='n')
+legend("top",legend=map.legend,ncol=6,fill=map.colors,title=map.title,cex=0.75,bty='n')
 ```
 **Figure 2.**	U.S. county-level CO emissions density estimates in tons/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
 
 ```{r label="Figure03-emissions-map-NOx"}
-breaks <- c(2,5,10,20)
-density <- county.data$NOx/county.data$area_km*2.59
+breaks <- c(2,5,10,20,50)
+density <- round(county.data$NOx/county.data$area_km*2.59,1)
 county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
 N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
-map.legend <- paste(c(0,breaks),"-",c((breaks-0.1),round(max(density)))," (",N,")",sep="")
+map.legend <- paste(c("0.0",sprintf("%3.1f",breaks+0.1))," - ",c(sprintf("%3.1f",breaks),
+  round(max(density)))," (",format(N,trim=TRUE,big.mark=","),")",sep="")
 map.title <- "Nitrogen Oxides Emissions Density in tons/year/mi^2 (# Counties)"
-layout(matrix(c(1,2),2,1),widths=1,heights=c(0.9,0.1))
-par(bg="gray95")
+layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+par(mar=c(0,0,0,0),bg="gray95")
 draw.map("state",proj.args=pa)
 for (i in 1:nrow(county.data)) {
   draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
 }
 draw.map("state",proj.args=pa,add=TRUE)
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,cex=0.75,bty='n')
+legend("top",legend=map.legend,ncol=6,fill=map.colors,title=map.title,cex=0.75,bty='n')
 ```
 **Figure 3.**	U.S. county-level NO~X~ emissions density estimates in tons/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
 
 ```{r label="Figure04-emissions-map-VOC"}
-breaks <- c(10,20,50,100)
-density <- county.data$VOC/county.data$area_km*2.59
+breaks <- c(10,20,50,100,200)
+density <- round(county.data$VOC/county.data$area_km*2.59)
 county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
 N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
-map.legend <- paste(c(0,breaks),"-",c((breaks-0.1),round(max(density)))," (",N,")",sep="")
+map.legend <- paste(c(0,breaks+1)," - ",c(breaks,round(max(density))),
+  " (",format(N,trim=TRUE,big.mark=","),")",sep="")
 map.title <- "Volatile Organic Compounds Emissions Density in tons/year/mi^2 (# Counties)"
-layout(matrix(c(1,2),2,1),widths=1,heights=c(0.9,0.1))
-par(bg="gray95")
+layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+par(mar=c(0,0,0,0),bg="gray95")
 draw.map("state",proj.args=pa)
 for (i in 1:nrow(county.data)) {
   draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
 }
 draw.map("state",proj.args=pa,add=TRUE)
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,cex=0.75,bty='n')
+legend("top",legend=map.legend,ncol=6,fill=map.colors,title=map.title,cex=0.75,bty='n')
 ```
 **Figure 4.**	U.S. county-level VOC emissions density estimates in tons/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
 
@@ -248,7 +248,7 @@ for (i in 2:nrow(nox.trends)) {
     col=trend.colors[i],border=trend.colors[i])
 }
 for (i in 1:nrow(nox.trends)) { lines(x=trend.years,y=nox.totals[i,],col=trend.border[i]) }
-box(); par(mar=c(5,5,1,1),mgp=c(3.5,0.7,0),las=2)
+box(); par(mar=c(5,5,1,1),mgp=c(3.5,0.7,0),las=2,bg="gray95")
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xaxs='i',xlim=c(2002,curr.year),
   xlab="Inventory Year",yaxs='i',ylim=c(0,18000),ylab="VOC Emissions (kTons/year)")
 axis(side=1,at=seq(2002,curr.year,3),labels=seq(2002,curr.year,3))
@@ -263,7 +263,7 @@ for (i in 2:nrow(voc.trends)) {
     col=trend.colors[i],border=trend.colors[i])
 }
 for (i in 1:nrow(voc.trends)) { lines(x=trend.years,y=voc.totals[i,],col=trend.border[i]) }
-box(); par(mar=c(5,5,1,1),mgp=c(3.5,0.7,0),las=2)
+box(); par(mar=c(5,5,1,1),mgp=c(3.5,0.7,0),las=2,bg="gray95")
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xaxs='i',xlim=c(2002,curr.year),
   xlab="Inventory Year",yaxs='i',ylim=c(0,95000),ylab="CO Emissions (kTons/year)")
 axis(side=1,at=seq(2002,curr.year,3),labels=seq(2002,curr.year,3))
@@ -278,7 +278,7 @@ for (i in 2:nrow(co.trends)) {
     col=trend.colors[i],border=trend.colors[i])
 }
 for (i in 1:nrow(co.trends)) { lines(x=trend.years,y=co.totals[i,],col=trend.border[i]) }
-box(); par(mar=c(5,5,1,1),mgp=c(3.5,0.7,0),las=2)
+box(); par(mar=c(5,5,1,1),mgp=c(3.5,0.7,0),las=2,bg="gray95")
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xaxs='i',xlim=c(2002,(curr.year-1)),
   xlab="Inventory Year",yaxs='i',ylim=c(0,45000),ylab="CH4 Emissions (kTons/year)")
 axis(side=1,at=seq(2002,(curr.year-1),3),labels=seq(2002,(curr.year-1),3))
@@ -293,7 +293,7 @@ for (i in 2:nrow(ch4.trends)) {
     col=trend.colors[i],border=trend.colors[i])
 }
 for (i in 1:nrow(ch4.trends)) { lines(x=ch4.years,y=ch4.totals[i,],col=trend.border[i]) }
-box(); par(mar=c(0,0,2,0));
+box(); par(mar=c(0,0,2,0),bg="gray95");
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1),main="Legend: CO, NOx, VOC")
 legend("top",legend=co.nox.voc,fill=rev(trend.colors),border=rev(trend.border),bg="gray80")
 par(mar=c(0,0,2,0))
@@ -317,27 +317,29 @@ o3.sites <- subset(o3.monitors,!duplicated(substr(id,1,9)))
 |      While the SLAMS network has a largely urban, population-based focus, there are monitoring sites in other networks that can be used to track compliance with the NAAQS in rural areas. For example, the [Clean Air Status and Trends Network (CASTNET)](https://www.epa.gov/castnet) sites are located in rural areas. There were `r sum(o3.sites$network == "CASTNET")` CASTNET sites operating in `r params$curr.year`, with most of the sites in the eastern U.S. being operated by the EPA, and most of the sites in the western U.S. being operated by the National Park Service (NPS). Finally, there are also a number of Special Purpose Monitors (SPMs), which are not required but are often operated by air agencies for short periods of time (i.e., less than 3 years) to collect data for human health and welfare studies, as well as other types of monitoring sites, including monitors operated by tribes and industrial sources. The SPMs are typically not used to assess compliance with the NAAQS.[^8]
 
 ```{r label="Figure06-monitor-map"}
-colors <- c("gray50","blue3","yellow3","red3")
+colors <- c("gray50","blue3","yellow3","red3","black")
 o3.monitors$site <- substr(o3.monitors$id,1,9)
 o3.monitors$class <- mapply(function(type,network) ifelse(network == "CASTNET","CASTNET",
   ifelse(network %in% c("NCORE","PROPOSED NCORE","PAMS","UNOFFICIAL PAMS"),"NCORE/PAMS",
-  ifelse(type == "SLAMS","SLAMS","SPM/OTHER"))),o3.monitors$monitor_type,o3.monitors$network)
-t <- ddply(o3.monitors,"site",summarize,latitude=as.numeric(latitude[1]),
-  longitude=as.numeric(longitude[1]),class=min(class))
+  ifelse(type == "SLAMS","SLAMS",ifelse(type == "TRIBAL","TRIBAL","SPM/OTHER")))),
+  o3.monitors$monitor_type,o3.monitors$network)
+t <- ddply(o3.monitors,"site",summarize,latitude=latitude[1],longitude=longitude[1],class=min(class))
 t$color <- sapply(substr(t$class,1,2),function(x) switch(x,
-  CA=colors[3],NC=colors[2],SL=colors[1],colors[4]))
+  CA=colors[3],NC=colors[2],SL=colors[1],TR=colors[5],colors[4]))
+t$pch <- sapply(substr(t$class,1,2),function(x) switch(x,CA=23,NC=22,SL=21,TR=25,24))
 t <- t[order(t$class,t$site,decreasing=TRUE),]
-N <- table(t$class)[c(3,2,1,4)]
+N <- table(t$class)[c(3,2,1,4,5)]
 legend.lab <- paste(names(N)," (",N,")",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="grey95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 for (i in 1:nrow(t)) {
   add.layer(type="points",x=t$longitude[i],y=t$latitude[i],
-    proj.args=pa,bg=t$color[i],pch=21)
+    proj.args=pa,bg=t$color[i],pch=t$pch[i])
 }
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.lab,pt.bg=colors,cex=0.75,pt.cex=1.25,
-  pch=21,bty='n',ncol=4,title="Monitoring Network (# Sites)")
+  pch=c(21:25),bty='n',ncol=5,title="Monitoring Network (# Sites)")
 ```
 **Figure 6:** Map of U.S. O~3~ monitoring sites reporting data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
 
@@ -402,7 +404,7 @@ kbl(o3.table3,booktabs=TRUE,format.args=list(big.mark=","),linesep=c("","","",""
 N.sites = number of sites; N.obs = number of observations; SD = standard deviation; min = minimum; p1, p5, p10, p25, p50, p90, p95, p98, p99 = 1st, 5th, 10th, 25th, 50th, 90th, 95th, 98th, 99th percentiles; max = maximum; max.site = AQS ID number for the monitoring site corresponding to the observation in the max column.
 Region is defined such that the eastern U.S. includes sites east of 100 degrees west longitude and the western U.S. includes sites west of 100 degrees west longitude; site.type = Urban includes Urban NCore and PAMS sites; Site.type = Rural includes CASTNET sites.
 
-|      Figure 8 below shows a map of the O~3~ design values at U.S. ambient air monitoring sites based on data from the `r params$curr.year-2`-`r params$curr.year` period. From the figure it is apparent that many monitoring sites have design values exceeding the current NAAQS, and that most of these sites are located in or near urban areas. The highest design values occurred in California, Texas, along the shoreline of Lake Michigan, and near large urban areas in the northeastern and western U.S. There are also high design values associated with wintertime O~3~ in the Uinta Basin in Utah. The lowest design values occurred in the north central region of the U.S., rural parts of New England and the southeastern U.S., and along the Pacific Ocean, including Alaska and Hawaii.
+|      Figure 8 below shows a map of the O~3~ design values at U.S. ambient air monitoring sites based on data from the `r params$curr.year-2`-`r params$curr.year` period. From the figure it is apparent that many monitoring sites have design values exceeding the current NAAQS, and that most of these sites are located in or near urban areas. The highest design values occurred in California, Texas, along the shoreline of Lake Michigan, and near large urban areas in the northeastern and western U.S. There are also high design values associated with wintertime O~3~ in the Uinta Basin in Utah. The lowest design values occurred in rural parts of New England and the southeastern U.S., and along the Pacific Ocean, including Alaska and Hawaii.
 
 ```{r label="Figure08-design-value-map"}
 load(paste(base.dir,"data/",curr.year,"/O3dvs2000_",curr.year,".Rdata",sep=""))
@@ -410,20 +412,21 @@ dvs.o3.8hr <- subset(o3.dvs,year == curr.year & valid_8hr == "Y",
   c("site","latitude","longitude","year","dv_8hr"))
 ny <- length(unique(o3.dvs$year))
 vals <- dvs.o3.8hr$dv_8hr; o <- order(vals);
-bins <- c(61,66,71,76,85)
-dv.colors <- c("blue3","cyan3","yellow3","orange3","red3","purple3") 
-pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=dv.colors)
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(61,66,71,76,85); 
+pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ppb (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.o3.8hr$longitude[o],y=dvs.o3.8hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.lab[keep],pch=21,col="black",
-  pt.bg=dv.colors[keep],cex=0.75,pt.cex=1.25,bty='n',ncol=3)
+  pt.bg=colors[keep],cex=0.75,pt.cex=1.25,bty='n',ncol=3)
 ```
 **Figure 8:** O~3~ design values in ppb for the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
 
@@ -448,10 +451,10 @@ ind <- as.integer(names(table(cat))); r <- order(abs(o3.site.dvs.8hr$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=o3.site.dvs.8hr$longitude[r],y=o3.site.dvs.8hr$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,cex=0.75,bty='n',col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -471,7 +474,7 @@ pct.change <- round(100*(median.past-median.curr)/median.past)
 ```{r label="Figure10-national-trend"}
 o3.trend.dvs.8hr <- apply(o3.site.dvs.8hr[,-c(1:3)],2,quantile,probs=c(0.1,0.5,0.9),na.rm=TRUE)
 trend.years <- c(2000:curr.year)
-par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,0.5),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(50,105),ylab="O3 Design Value (ppb)",main="")
 axis(side=1,at=trend.years,labels=trend.years,las=2)
@@ -484,6 +487,7 @@ abline(h=70,lty=2,lwd=1.5,col="black"); box();
 legend("topright",legend=c("10th/90th Percentile 8-hour DV","Median 8-hour DV","O3 8-hour NAAQS Level"),
   lty=c(2,1,2),col=c(rep("steelblue",2),"black"),cex=0.75,bty='n',lwd=1.5)
 ```
+\vspace{-5truemm}
 **Figure 10:** National trend in O~3~ design values in ppb, 2000 to `r params$curr.year`. **Source:** [AQS](https://www.epa.gov/aqs).
 
 \newpage
@@ -493,7 +497,7 @@ legend("topright",legend=c("10th/90th Percentile 8-hour DV","Median 8-hour DV","
 ```{r label="FIgure11-conc-boxplots",fig.height=5}
 o3.stats <- tapply(pmin(o3.annual$conc,250),list(o3.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(o3.annual$year); years <- c(1980:curr.year);
-par(mar=c(3,3,1,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,250),ylab="Annual 4th Highest Daily Max 8-hour O3 Concentration (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)

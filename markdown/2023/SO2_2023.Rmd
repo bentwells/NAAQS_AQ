@@ -97,8 +97,9 @@ pie.labels <- paste(c("Wildfires","Agricultural &\nPrescribed Fires",
 pie.total <- format(round(sum(df$emis/1000)),big.mark=",")
 pie.title <- paste("SO2 Emissions (",pie.total," kTon/year)",sep="")
 par(mar=c(0,5,2,5),bg="gray95",cex=0.75)
-pie(x=df$emis,labels=pie.labels,main=pie.title,col=pie.colors,radius=0.9)
+pie.chart(x=df$emis,labels=pie.labels,main=pie.title,col=pie.colors,radius=0.9)
 ```
+\vspace{-5truemm}
 **Figure 1.** U.S. SO~2~ emissions by sector. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data).
 
 |      Figure 2 shows the SO~2~ emissions density in tons/mi^2^/year for each U.S. county based on the `r params$nei.year` NEI. The majority of SO~2~ emissions tend to be located near large point sources such as coal-fired EGUs or large industrial facilities. Counties near urban areas also tend to have higher SO~2~ emissions due to the higher concentration of industrial facilities. Counties in rural areas may also have higher emissions due to oil and gas extraction or fires.
@@ -106,22 +107,23 @@ pie(x=df$emis,labels=pie.labels,main=pie.title,col=pie.colors,radius=0.9)
 |      Figure 3 below illustrates the national SO~2~ emissions trends from 2002 to `r params$curr.year`[^1]. Declines in SO~2~ emissions are likely related to the implementation of national control programs developed under the Clean Air Act Amendments of 1990, including Phase I and II of the Acid Rain Program, the Clean Air Interstate Rule, the Cross-State Air Pollution Rule, and the adoption of low sulfur diesel fuel standards. An additional factor is changes in market conditions, such as the reduction of the use of coal in energy generation. These changes have resulted in a `r pct.chg`% decrease in SO~2~ emissions from 2002 to `r params$curr.year`, including reductions of `r pct.chg.egu`% in emissions from EGUs and `r pct.chg.mob`% in emissions from mobile sources.
 
 ```{r label="Figure02-emissions-map",fig.height=5}
-breaks <- c(0.3,1,3,10)
-density <- county.data$SO2/county.data$area_km*2.59
-map.colors <- c("#EFF3FF","#BDD7E7","#6BAED6","#3182BD","#08519C")
+breaks <- c(0.3,1,3,10,30)
+density <- round(county.data$SO2/county.data$area_km*2.59,2)
+map.colors <- c("#FFFFCC","#C7E9B4","#7FCDBB","#41B6C4","#2C7FB8","#253494")
 county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
 N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
-map.legend <- paste(c(0,breaks),"-",c((breaks-0.01),round(max(density)))," (",N,")",sep="")
+map.legend <- paste(c("0.0",sprintf("%3.1f",breaks+0.1))," - ",c(sprintf("%3.1f",breaks),
+  round(max(density)))," (",format(N,trim=TRUE,big.mark=","),")",sep="")
 map.title <- "Sulfur Dioxide Emissions Density in tons/year/mi^2 (# Counties)"
-layout(matrix(c(1,2),2,1),widths=1,heights=c(0.9,0.1))
+layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+par(mar=c(0,0,0,0),bg="gray95")
 draw.map("state",proj.args=pa)
 for (i in 1:nrow(county.data)) {
   draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
 }
 draw.map("state",proj.args=pa,add=TRUE)
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,cex=0.75,bty='n')
+legend("top",legend=map.legend,ncol=6,fill=map.colors,title=map.title,cex=0.75,bty='n')
 ```
 **Figure 2.**	U.S. county-level SO~2~ emissions density estimates in tons/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
 
@@ -135,7 +137,7 @@ df <- trends.data$SO2[match(source.cat,trends.data$SO2$source),
 df2 <- apply(df[c(nrow(df):1),-1],2,cumsum)
 source.labels <- c("Stationary Fuel Combustion","Industrial and Other Processes",
   "Transportation","Other Anthropogenic Sources")
-par(mar=c(4,4,1,1),mgp=c(2.5,0.75,0),las=2,cex.axis=0.75,cex.lab=0.75)
+par(mar=c(4,4,0.5,0.5),mgp=c(3,0.75,0),las=2,cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xaxs='i',xlim=c(2002,curr.year),
   xlab="Inventory Year",yaxs='i',ylim=c(0,16000),ylab="SO2 Emissions (kTons/year)")
 axis(side=1,at=seq(2002,curr.year,3),labels=seq(2002,curr.year,3))
@@ -152,6 +154,7 @@ for (i in 1:nrow(df)) { lines(x=trend.years,y=df2[i,],col=trend.border[i+1]) }
 legend("topright",legend=source.labels,fill=rev(trend.colors[2:5]),
   border=rev(trend.border[2:5]),cex=0.75,bty='n')
 ```
+\vspace{-5truemm}
 **Figure 3.**	U.S. anthropogenic SO~2~ emissions trend, 2002-`r params$curr.year`. **Source:** [EPA's Air Pollutant Emissions Trends Data ](https://www.epa.gov/air-emissions-inventories/air-pollutant-emissions-trends-data)
 
 ## 4. Ambient Air Monitoring Requirements and Monitoring Networks
@@ -170,27 +173,28 @@ so2.sites <- subset(so2.monitors,!duplicated(substr(id,1,9)))
 |      Finally, there are also a number of Special Purpose Monitoring Stations (SPMs), which are not required but are often operated by air agencies for short periods of time (i.e., less than 3 years) to collect data for human health and welfare studies, as well as other types of monitoring sites, including monitors operated by federal agencies and tribal governments. The SPMs are typically not used to assess compliance with the NAAQS.
 
 ```{r label="Figure04-monitor-map",fig.height=5}
-colors <- c("gray50","blue3","yellow3","red3")
+colors <- c("gray50","blue3","yellow3","red3","black")
 so2.monitors$site <- substr(so2.monitors$id,1,9)
 so2.monitors$class <- mapply(function(type,network) ifelse(type == "INDUSTRIAL","INDUSTRIAL",
-  ifelse(network == "NCORE","NCORE",ifelse(type == "SLAMS","SLAMS","SPM/OTHER"))),
-  so2.monitors$monitor_type,so2.monitors$network)
-t <- ddply(so2.monitors,"site",summarize,latitude=as.numeric(latitude[1]),
-  longitude=as.numeric(longitude[1]),class=min(class))
+  ifelse(network == "NCORE","NCORE",ifelse(type == "SLAMS","SLAMS",ifelse(type == "TRIBAL",
+  "TRIBAL","SPM/OTHER")))),so2.monitors$monitor_type,so2.monitors$network)
+t <- ddply(so2.monitors,"site",summarize,latitude=latitude[1],longitude=longitude[1],class=min(class))
 t$color <- sapply(substr(t$class,1,2),function(x) switch(x,
-  IN=colors[3],NC=colors[2],SL=colors[1],colors[4]))
+  IN=colors[3],NC=colors[2],SL=colors[1],TR=colors[5],colors[4]))
+t$pch <- sapply(substr(t$class,1,2),function(x) switch(x,IN=23,NC=22,SL=21,TR=25,24))
 t <- t[order(t$class,t$site,decreasing=TRUE),]
-N <- table(t$class)[c(3,2,1,4)]
+N <- table(t$class)[c(3,2,1,4,5)]
 legend.lab <- paste(names(N)," (",N,")",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="grey95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 for (i in 1:nrow(t)) {
   add.layer(type="points",x=t$longitude[i],y=t$latitude[i],
-    proj.args=pa,bg=t$color[i],pch=21)
+    proj.args=pa,bg=t$color[i],pch=t$pch[i])
 }
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("bottom",legend=legend.lab,pt.bg=colors,pch=21,cex=0.75,
-  pt.cex=1.25,bty='n',ncol=4,title="Monitoring Network (# Sites)")
+legend("bottom",legend=legend.lab,pt.bg=colors,pch=c(21:25),cex=0.75,
+  pt.cex=1.25,bty='n',ncol=5,title="Monitoring Network (# Sites)")
 ```
 **Figure 4:** Map of U.S. SO~2~ monitoring sites reporting data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
 
@@ -247,14 +251,16 @@ N.sites = number of sites; N.obs = number of observations; SD = standard deviati
 dvs.so2.1hr <- subset(so2.dvs,year == curr.year & dv_valid == "Y",
   c("site","latitude","longitude","year","dv"))
 vals <- dvs.so2.1hr$dv; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3","purple3"); bins <- c(26,51,76,101,251); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(26,51,76,101,251); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ppb (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.so2.1hr$longitude[o],y=dvs.so2.1hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -278,10 +284,10 @@ pt.cex <- c(1.25,1,0.75,1,1.25); pt.pch <- c(25,25,21,24,24);
 ind <- as.integer(names(table(cat))); r <- order(abs(so2.site.dvs.1hr$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=so2.site.dvs.1hr$longitude[r],y=so2.site.dvs.1hr$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=0.75,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -299,7 +305,7 @@ pct.change.1hr <- round(100*(median.1hr.past-median.1hr.curr)/median.1hr.past)
 
 ```{r label="Figure07-national-trend",fig.height=5}
 so2.trend.dvs.1hr <- apply(so2.site.dvs.1hr[,-c(1:3)],2,quantile,probs=c(0.1,0.5,0.9),na.rm=TRUE)
-par(mar=c(3,3,1,1),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,0.5),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(0,200),ylab="SO2 Design Value (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -316,12 +322,12 @@ legend("topright",legend=c("10th/90th Percentile DV","Median DV","SO2 NAAQS Leve
 
 \newpage
 
-|      Figure 8 below shows the national distribution of the annual 99th percentile MDA1 SO~2~ concentrations reported in each year from 1980 to `r params$curr.year`.[^4] The red line shows the number of sites included in the boxplot for each year, and the high concentrations originating from the sites in Hawaii influenced by volcanic eruptions are marked with orange dots. The median annual 99th percentile MDA1 SO~2~ concentration decreased by about `r pct.chg`%, from `r round(median.yr1)` ppb in 1980 to `r round(median.yr2,1)` ppb in `r params$curr.year`. While annual 99th percentile values as high as 2,000 ppb (2 ppm) were measured near some industrial sources in the 1980s, all of the 99th percentile concentration values above 500 ppb that have been reported since 2010 have come from sites in Hawaii that are influenced by volcanic eruptions. The SO~2~ monitoring network grew quickly in the early 1980s, reaching a peak size of over 750 sites in 1984. Since then, the monitoring network has slowly decreased in size as many sites measuring low concentrations have been discontinued. There was a brief increase in the number of sites in 2017, as SO~2~ monitors required through the DRR (see section 4 above for more information) came online. These additional sites were all located near major industrial sources of SO~2~ and likely caused the slight increase in the median concentration observed in 2017.
+|      Figure 8 below shows the national distribution of the annual 99th percentile MDA1 SO~2~ concentrations reported in each year from 1980 to `r params$curr.year`.[^4] The red line shows the number of sites included in the boxplot for each year, and the high concentrations originating from the sites in Hawaii influenced by volcanic eruptions are marked with orange dots. The median annual 99th percentile MDA1 SO~2~ concentration decreased by about `r pct.chg`%, from `r round(median.yr1)` ppb in 1980 to `r round(median.yr2,1)` ppb in `r params$curr.year`. While annual 99th percentile values as high as 2,000 ppb (2 ppm) were measured near some industrial sources in the 1980s, all of the 99th percentile concentration values above 500 ppb that have been reported since 2010 have come from sites in Hawaii that are influenced by volcanic eruptions, except for one site where the data quality in 2023 is still being assessed. The SO~2~ monitoring network grew quickly in the early 1980s, reaching a peak size of over 750 sites in 1984. Since then, the monitoring network has slowly decreased in size as many sites measuring low concentrations have been discontinued. There was a brief increase in the number of sites in 2017, as SO~2~ monitors required through the DRR (see section 4 above for more information) came online. These additional sites were all located near major industrial sources of SO~2~ and likely caused the slight increase in the median concentration observed in 2017.
 
 ```{r label="Figure08-conc-boxplots",fig.height=5}
 so2.stats <- tapply(pmax(log10(so2.annual$conc),0),list(so2.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(so2.annual$year); years <- c(1980:curr.year);
-par(mar=c(3,3,1,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,4),ylab="Annual 99th Percentile Daily Max 1-hour SO2 Concentration (ppb)",main="")
 yaxs.labs <- c(1,2,5,10,20,50,100,200,500,1000,2000,5000,10000)

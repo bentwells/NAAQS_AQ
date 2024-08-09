@@ -80,34 +80,36 @@ df$emis[7] <- sum(sector.data$CO[setdiff(grep("Mobile -",sector.data$sector),
 df$emis[8] <- sum(sector.data$CO,na.rm=TRUE)-sum(df$emis[1:7])
 df$pct <- 100*df$emis/sum(df$emis)
 pie.labels <- paste(c("Biogenics","Wildfires","Agricultural &\nPrescribed Fires",
-  "Stationary Fuel\n Combustion","Industrial\nProcesses","Highway Vehicles",
+  "Stationary Fuel\nCombustion","Industrial\nProcesses","Highway Vehicles",
   "Non-Road Mobile","Other")," ",round(df$pct),"%",sep="")
 pie.total <- format(round(sum(df$emis/1000)),big.mark=",")
 pie.title <- paste("CO Emissions (",pie.total," kTon/year)",sep="")
 par(mar=c(0,5,2,5),bg="gray95",cex=0.75)
-pie(x=df$emis,labels=pie.labels,main=pie.title,col=pie.colors,radius=0.9)
+pie.chart(x=df$emis,labels=pie.labels,main=pie.title,col=pie.colors,radius=0.9)
 ```
+\vspace{-5truemm}
 **Figure 1.** U.S. CO emissions by sector. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data).
 
 |      Figure 2 shows the CO emissions density in tons/mi^2^/year for each U.S. county based on the `r params$nei.year` NEI. The majority of CO emissions tend to be located near urban areas, which tend to have the most vehicle traffic and industrial sources. However, there are also some counties in rural areas with higher CO emissions due to fires or the presence of large stationary sources such as power plants. Figure 3 shows the national trend in U.S. anthropogenic CO emissions by sector from 2002 to `r params$curr.year`.[^1] Nationally, CO emissions have decreased by `r pct.chg`% since 2002, mostly due to reductions in mobile source emissions. 
 
 ```{r label="Figure02-emissions-map",fig.height=5}
-breaks <- c(20,50,100,200)
-density <- county.data$CO/county.data$area_km*2.59
-map.colors <- c("#EFF3FF","#BDD7E7","#6BAED6","#3182BD","#08519C")
+breaks <- c(20,50,100,200,500)
+density <- round(county.data$CO/county.data$area_km*2.59)
+map.colors <- c("#FFFFCC","#C7E9B4","#7FCDBB","#41B6C4","#2C7FB8","#253494") 
 county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
 N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
-map.legend <- paste(c(0,breaks),"-",c((breaks-0.1),round(max(density)))," (",N,")",sep="")
+map.legend <- paste(c(0,breaks+1)," - ",c((breaks),format(round(max(density)),big.mark=",")),
+  " (",format(N,trim=TRUE,big.mark=","),")",sep="")
 map.title <- "Carbon Monoxide Emissions Density in tons/year/mi^2 (# Counties)"
-layout(matrix(c(1,2),2,1),widths=1,heights=c(0.9,0.1))
+layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+par(mar=c(0,0,0,0),bg="gray95")
 draw.map("state",proj.args=pa)
 for (i in 1:nrow(county.data)) {
   draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
 }
 draw.map("state",proj.args=pa,add=TRUE,lwd=1)
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,cex=0.75,bty='n')
+legend("top",legend=map.legend,ncol=6,fill=map.colors,title=map.title,cex=0.75,bty='n')
 ```
 **Figure 2.**	U.S. county-level CO emissions density estimates in tons/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
 
@@ -121,7 +123,7 @@ df <- trends.data$CO[match(source.cat,trends.data$CO$source),
 df2 <- apply(df[c(nrow(df):1),-1],2,cumsum)
 source.labels <- c("Highway Vehicles","Non-Road Mobile","Stationary Fuel Combustion",
   "Industrial and Other Processes","Other Anthropogenic Sources")
-par(mar=c(4,4,1,1),mgp=c(3,0.75,0),las=2,cex.axis=0.75,cex.lab=0.75)
+par(mar=c(4,4,0.5,0.5),mgp=c(3,0.75,0),las=2,cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xaxs='i',xlim=c(2002,curr.year),
   xlab="Inventory Year",yaxs='i',ylim=c(0,95000),ylab="CO Emissions (kTons/year)")
 axis(side=1,at=seq(2002,curr.year,3),labels=seq(2002,curr.year,3))
@@ -139,6 +141,7 @@ legend("topright",legend=source.labels,fill=rev(trend.colors),
   border=rev(trend.border),cex=0.75,bty='n')
 box()
 ```
+\vspace{-5truemm}
 **Figure 3.**	U.S. anthropogenic CO emissions trend, 2002-`r params$curr.year`. **Source:** [EPA’s Air Pollutant Emissions Trends Data ](https://www.epa.gov/air-emissions-inventories/air-pollutant-emissions-trends-data)
 
 ## 4. Ambient Air Monitoring Requirements and Monitoring Networks
@@ -150,30 +153,31 @@ co.sites <- subset(co.monitors,!duplicated(substr(id,1,9)))
 
 |      The EPA and its partners at State, Local and Tribal monitoring agencies manage and operate the nation's ambient air monitoring networks. The EPA provides monitoring requirements for CO and other pollutants in [40 CFR Part 58](https://www.ecfr.gov/current/title-40/part-58). Monitoring agencies carry out and perform ambient air monitoring in accordance with the EPA's requirements and guidance. Federal Reference Methods (FRMs) and Federal Equivalent Methods (FEMs) are monitoring methods that have been approved for use by States and other monitoring organizations to assess NAAQS compliance and implementation. Prior to 2006, CO monitoring instruments typically had a lower detection limit (LDL) of 0.5 ppm. This is sufficient for the purpose of determining compliance with the CO NAAQS, but with many areas routinely measuring CO levels below 1 ppm, a large percentage of the measurements from these monitors were below the LDL of these instruments, which contributed to greater measurement uncertainties. Since 2005, the older instruments have slowly been replaced with a new generation of 'trace-level' instruments, which have LDLs on the order of 0.02 to 0.04 ppm. As of `r params$curr.year`, about half of the CO monitoring network consists of measurements from these newer trace-level instruments.
 
-|      There were `r nrow(co.sites)` monitoring sites reporting hourly CO concentration data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. The locations of these monitoring sites are shown in Figure 4. The main network providing ambient data for use in comparison to the NAAQS is the State and Local Air Monitoring Stations (SLAMS) network, which consists of nearly 90% of all CO monitoring sites in the U.S. Currently there are no minimum monitoring requirements for the number of CO monitoring sites, except as part of the NCore and near-road networks as discussed below. However, continued operation of existing SLAMS sites is required unless discontinuation is approved by the EPA Regional Administrator. Further, in areas where SLAMS CO monitoring is ongoing, at least one site must be a maximum concentration site for the area.
+|      There were `r nrow(co.sites)` monitoring sites reporting hourly CO concentration data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. The locations of these monitoring sites are shown in Figure 4. The main network providing ambient data for use in comparison to the NAAQS is the State and Local Air Monitoring Stations (SLAMS) network, which consists of about 90% of all CO monitoring sites in the U.S. Currently there are no minimum monitoring requirements for the number of CO monitoring sites, except as part of the NCore and near-road networks as discussed below. However, continued operation of existing SLAMS sites is required unless discontinuation is approved by the EPA Regional Administrator. Further, in areas where SLAMS CO monitoring is ongoing, at least one site must be a maximum concentration site for the area.
 
 ```{r label="Figure04-monitor-map",fig.height=5}
-colors <- c("gray50","blue3","yellow3","red3")
+colors <- c("gray50","blue3","yellow3","red3","black")
 co.monitors$site <- substr(co.monitors$id,1,9)
 co.monitors$class <- mapply(function(type,network) ifelse(network == "NEAR ROAD","NEAR ROAD",
-  ifelse(network == "NCORE","NCORE",ifelse(type == "SLAMS","SLAMS","SPM/OTHER"))),
-  co.monitors$monitor_type,co.monitors$network)
-t <- ddply(co.monitors,"site",summarize,latitude=as.numeric(latitude[1]),
-  longitude=as.numeric(longitude[1]),class=min(class))
+  ifelse(network == "NCORE","NCORE",ifelse(type == "SLAMS","SLAMS",ifelse(type == "TRIBAL",
+  "TRIBAL","SPM/OTHER")))),co.monitors$monitor_type,co.monitors$network)
+t <- ddply(co.monitors,"site",summarize,latitude=latitude[1],longitude=longitude[1],class=min(class))
 t$color <- sapply(substr(t$class,1,2),function(x) switch(x,
-  NE=colors[3],NC=colors[2],SL=colors[1],colors[4]))
+  NE=colors[3],NC=colors[2],SL=colors[1],TR=colors[5],colors[4]))
+t$pch <- sapply(substr(t$class,1,2),function(x) switch(x,NE=23,NC=22,SL=21,TR=25,24))
 t <- t[order(t$class,t$site,decreasing=TRUE),]
-N <- table(t$class)[c(3,1,2,4)]
+N <- table(t$class)[c(3,1,2,4,5)]
 legend.lab <- paste(names(N)," (",N,")",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="grey95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 for (i in 1:nrow(t)) {
   add.layer(type="points",x=t$longitude[i],y=t$latitude[i],
-    proj.args=pa,bg=t$color[i],pch=21)
+    proj.args=pa,bg=t$color[i],pch=t$pch[i])
 }
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("bottom",legend=legend.lab,pt.bg=colors,pch=21,cex=0.75,
-  pt.cex=1.25,bty='n',ncol=4,title="Monitoring Network (# Sites)")
+legend("bottom",legend=legend.lab,pt.bg=colors,pch=c(21:25),cex=0.75,
+  pt.cex=1.25,bty='n',ncol=5,title="Monitoring Network (# Sites)")
 ```
 **Figure 4:** Map of U.S. CO monitoring sites reporting data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
 
@@ -227,20 +231,22 @@ N.sites = number of sites; N.obs = number of observations; SD = standard deviati
 
 \newpage
 
-|      Figure 5 below shows a map of the 8-hour CO design values and Figure 6 shows a map of the 1-hour CO design values at U.S. ambient air monitoring sites based on data from the `r params$curr.year-1`-`r params$curr.year` period. There were two sites in Puerto Rico that exceeded the 8-hour CO NAAQS in 2022-2023. It is unclear what caused these high concentrations. There were no sites that exceeded the 1-hour CO NAAQS in `r params$curr.year-1`-`r params$curr.year`. Nearly all other sites in the U.S. were well below the NAAQS, with design values generally below 3 ppm for the 8-hour CO NAAQS and below 5 ppm for the 1-hour CO NAAQS.
+|      Figure 5 below shows a map of the 8-hour CO design values and Figure 6 shows a map of the 1-hour CO design values at U.S. ambient air monitoring sites based on data from the `r params$curr.year-1`-`r params$curr.year` period. There were no sites that exceeded the 1-hour or 8-hour CO NAAQS in `r params$curr.year-1`-`r params$curr.year`. Nearly all other sites in the U.S. were well below the NAAQS, with design values generally below 5 ppm for the 1-hour CO NAAQS and below 3 ppm for the 8-hour CO NAAQS.
 
 ```{r label="Figure05-dv-map-8hr",fig.height=5}
 dvs.co.8hr <- ddply(subset(co.dvs,year == curr.year & !is.na(dv_8hr)),c("site"),summarize,
   latitude=latitude[1],longitude=longitude[1],year=year[1],dv_8hr=max(dv_8hr))
 vals <- dvs.co.8hr$dv_8hr; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(3.1,6.1,9.1,15.1); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(3.1,6.1,9.1,12.1,20.1); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-0.1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-0.1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(sprintf("%4.1f",bin.min)," - ",bin.max," ppm (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.co.8hr$longitude[o],y=dvs.co.8hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -253,14 +259,16 @@ legend("bottom",legend=legend.lab[keep],pch=21,col="black",
 dvs.co.1hr <- ddply(subset(co.dvs,year == curr.year & !is.na(dv_1hr)),c("site"),summarize,
   latitude=latitude[1],longitude=longitude[1],year=year[1],dv_1hr=max(dv_1hr))
 vals <- dvs.co.1hr$dv_1hr; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(5.1,10.1,20.1,35.1); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(5.1,15.1,35.1,50.1,100.1); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-0.1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-0.1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(sprintf("%4.1f",bin.min)," - ",bin.max," ppm (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.co.1hr$longitude[o],y=dvs.co.1hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -284,10 +292,10 @@ pt.cex <- c(1.25,1,0.75,1,1.25); pt.pch <- c(25,25,21,24,24);
 ind <- as.integer(names(table(cat))); r <- order(abs(co.site.dvs.8hr$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=co.site.dvs.8hr$longitude[r],y=co.site.dvs.8hr$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=0.75,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -305,10 +313,10 @@ pt.cex <- c(1.25,1,0.75,1,1.25); pt.pch <- c(25,25,21,24,24);
 ind <- as.integer(names(table(cat))); r <- order(abs(co.site.dvs.1hr$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=co.site.dvs.1hr$longitude[r],y=co.site.dvs.1hr$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=0.75,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -330,7 +338,7 @@ pct.change.1hr <- round(100*(median.1hr.past-median.1hr.curr)/median.1hr.past)
 ```{r label="Figure09-national-trend",fig.height=5}
 co.trend.dvs.1hr <- apply(co.site.dvs.1hr[,-c(1:3)],2,quantile,probs=c(0.1,0.5,0.9),na.rm=TRUE)
 co.trend.dvs.8hr <- apply(co.site.dvs.8hr[,-c(1:3)],2,quantile,probs=c(0.1,0.5,0.9),na.rm=TRUE)
-par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,0.5),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(0,15),ylab="CO Design Value (ppm)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -347,6 +355,7 @@ legend("topright",legend=c("10th/90th Percentile 1-hour DV","Median 1-hour DV",
   "10th/90th Percentile 8-hour DV","Median 8-hour DV","CO 8-hour NAAQS Level"),
   lty=c(2,1,2,1,2),col=c(rep("orange3",2),rep("steelblue",2),"black"),bty='n',lwd=1.5,cex=0.75)
 ```
+\vspace{-5truemm}
 **Figure 9:** National trends in CO design values in ppm, 2000 to `r params$curr.year`. **Source:** [AQS](https://www.epa.gov/aqs).
 
 \newpage
@@ -356,7 +365,7 @@ legend("topright",legend=c("10th/90th Percentile 1-hour DV","Median 1-hour DV",
 ```{r label="Figure10-conc-boxplots-8hr",fig.height=5}
 co.stats <- tapply(co.annual$conc.8hr,list(co.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(co.annual$year); years <- c(1980:curr.year);
-par(mar=c(3,3,1,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,30),ylab="Annual 2nd Highest 8-hour CO Concentration (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -380,7 +389,7 @@ legend("topright",legend=c("Number of CO Sites","8-hour CO NAAQS Level"),
 ```{r label="Figure11-conc-boxplots-1hr",fig.height=5}
 co.stats <- tapply(co.annual$conc.1hr,list(co.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(co.annual$year); years <- c(1980:curr.year);
-par(mar=c(3,3,1,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,50),ylab="Annual 2nd Highest 1-hour CO Concentration (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)

@@ -326,10 +326,10 @@ o3.table2 <- rbind(
 ## Table 3: Warm season dataset aggregated by site type
 o3.monitors$site <- substr(o3.monitors$id,1,9)
 sites <- subset(o3.monitors,!duplicated(site))
-rural.east <- subset(daily.ws,site %in% sites$site[which(sites$class == "CASTNET" & as.numeric(sites$longitude) > -100)])
+rural.east <- subset(daily.ws,site %in% sites$site[which(sites$network == "CASTNET" & as.numeric(sites$longitude) > -100)])
 urban.east <- subset(daily.ws,site %in% sites$site[which((grepl("NCORE",sites$network) | grepl("PAMS",sites$network)) &
    sites$measurement_scale != "Regional Scale" & as.numeric(sites$longitude) > -100)])
-rural.west <- subset(daily.ws,site %in% sites$site[which(sites$class == "CASTNET" & as.numeric(sites$longitude) < -100)])
+rural.west <- subset(daily.ws,site %in% sites$site[which(sites$network == "CASTNET" & as.numeric(sites$longitude) < -100)])
 urban.west <- subset(daily.ws,site %in% sites$site[which((grepl("NCORE",sites$network) | grepl("PAMS",sites$network)) &
    sites$measurement_scale != "Regional Scale" & as.numeric(sites$longitude) < -100)])
 o3.table3 <- rbind(
@@ -386,21 +386,21 @@ pm.table1 <- rbind(
   get.stats(df=pm10.mda1,metric="MDA1",region="all",season="2nd quarter",format="%5.0f"),
   get.stats(df=pm10.mda1,metric="MDA1",region="all",season="3rd quarter",format="%5.0f"),
   get.stats(df=pm10.mda1,metric="MDA1",region="all",season="4th quarter",format="%5.0f"),
-  get.stats(df=pm25.mean,metric="DA24",region="all",season="all",format="6.1f"),
-  get.stats(df=pm25.mean,metric="DA24",region="all",season="1st quarter",format="6.1f"),
-  get.stats(df=pm25.mean,metric="DA24",region="all",season="2nd quarter",format="6.1f"),
-  get.stats(df=pm25.mean,metric="DA24",region="all",season="3rd quarter",format="6.1f"),
-  get.stats(df=pm25.mean,metric="DA24",region="all",season="4th quarter",format="6.1f"),
-  get.stats(df=pm25.mda1,metric="MDA1",region="all",season="all",format="6.1f"),
-  get.stats(df=pm25.mda1,metric="MDA1",region="all",season="1st quarter",format="6.1f"),
-  get.stats(df=pm25.mda1,metric="MDA1",region="all",season="2nd quarter",format="6.1f"),
-  get.stats(df=pm25.mda1,metric="MDA1",region="all",season="3rd quarter",format="6.1f"),
-  get.stats(df=pm25.mda1,metric="MDA1",region="all",season="4th quarter",format="6.1f"),
-  get.stats(df=pm10_25,metric="DA24",region="all",season="all",format="6.1f"),
-  get.stats(df=pm10_25,metric="DA24",region="all",season="1st quarter",format="6.1f"),
-  get.stats(df=pm10_25,metric="DA24",region="all",season="2nd quarter",format="6.1f"),
-  get.stats(df=pm10_25,metric="DA24",region="all",season="3rd quarter",format="6.1f"),
-  get.stats(df=pm10_25,metric="DA24",region="all",season="4th quarter",format="6.1f"))
+  get.stats(df=pm25.mean,metric="DA24",region="all",season="all",format="%6.1f"),
+  get.stats(df=pm25.mean,metric="DA24",region="all",season="1st quarter",format="%6.1f"),
+  get.stats(df=pm25.mean,metric="DA24",region="all",season="2nd quarter",format="%6.1f"),
+  get.stats(df=pm25.mean,metric="DA24",region="all",season="3rd quarter",format="%6.1f"),
+  get.stats(df=pm25.mean,metric="DA24",region="all",season="4th quarter",format="%6.1f"),
+  get.stats(df=pm25.mda1,metric="MDA1",region="all",season="all",format="%6.1f"),
+  get.stats(df=pm25.mda1,metric="MDA1",region="all",season="1st quarter",format="%6.1f"),
+  get.stats(df=pm25.mda1,metric="MDA1",region="all",season="2nd quarter",format="%6.1f"),
+  get.stats(df=pm25.mda1,metric="MDA1",region="all",season="3rd quarter",format="%6.1f"),
+  get.stats(df=pm25.mda1,metric="MDA1",region="all",season="4th quarter",format="%6.1f"),
+  get.stats(df=pm10_25,metric="DA24",region="all",season="all",format="%6.1f"),
+  get.stats(df=pm10_25,metric="DA24",region="all",season="1st quarter",format="%6.1f"),
+  get.stats(df=pm10_25,metric="DA24",region="all",season="2nd quarter",format="%6.1f"),
+  get.stats(df=pm10_25,metric="DA24",region="all",season="3rd quarter",format="%6.1f"),
+  get.stats(df=pm10_25,metric="DA24",region="all",season="4th quarter",format="%6.1f"))
 pm.table1$region <- rep(c("PM10","PM10","PM2.5","PM2.5","PM10-2.5"),each=5)
 colnames(pm.table1)[2:3] <- c("pollutant","quarter")
 pm.table1 <- pm.table1[,c(2,1,3:ncol(pm.table1))]

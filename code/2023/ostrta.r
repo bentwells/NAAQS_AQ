@@ -2,7 +2,7 @@
 ## ostrta.r - One script to rule them all!
 ## Extracts AQS data, generates PNG figures, and renders PDFs
 ## Author: Ben Wells, U.S. EPA/OAR/OAQPS
-## Last Updated: June 14, 2024
+## Last Updated: August 7, 2024
 #############################################################
 
 ## Set up working environment

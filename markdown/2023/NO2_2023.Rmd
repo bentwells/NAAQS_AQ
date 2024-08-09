@@ -85,31 +85,35 @@ pie.labels <- paste(c("Biogenics","All Fires","Stationary Fuel Combustion","Indu
 pie.total <- format(round(sum(df$emis/1000)),big.mark=",")
 pie.title <- paste("NOx Emissions (",pie.total," kTon/year)",sep="")
 par(mar=c(0,5,2,5),bg="gray95",cex=0.75)
-pie(x=df$emis,labels=pie.labels,main=pie.title,col=pie.colors,radius=0.9)
+pie.chart(x=df$emis,labels=pie.labels,main=pie.title,col=pie.colors,radius=0.9)
 ```
+\vspace{-5truemm}
 **Figure 1.** U.S. NO~X~ emissions by sector. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data).
 
 |      Figure 2 below shows the NO~X~ emissions density in tons/mi^2^/year for each U.S. county based on the `r params$nei.year` NEI. The majority of NO~X~ emissions tend to be located near urban areas, which tend to have the most vehicle traffic and industrial sources. However, there are also some counties in rural areas with higher NO~X~ emissions due to the presence of large stationary sources such as EGUs or oil and gas extraction.
 
 ```{r label="Figure02-emissions-map",fig.height=5}
-breaks <- c(2,5,10,20)
-map.colors <- c("#EFF3FF","#BDD7E7","#6BAED6","#3182BD","#08519C")
-density <- county.data$NOx/county.data$area_km*2.59
+breaks <- c(2,5,10,20,50)
+map.colors <- c("#FFFFCC","#C7E9B4","#7FCDBB","#41B6C4","#2C7FB8","#253494")
+density <- round(county.data$NOx/county.data$area_km*2.59,1)
 county.data$color <- assign.colors(density,discrete=TRUE,breaks=breaks,palette=map.colors)
 N <- table(cut(density,breaks=c(0,breaks,Inf),include.lowest=TRUE))
-map.legend <- paste(c(0,breaks),"-",c((breaks-0.1),round(max(density)))," (",N,")",sep="")
+map.legend <- paste(c("0.0",sprintf("%3.1f",breaks+0.1))," - ",c(sprintf("%3.1f",breaks),
+  round(max(density)))," (",format(N,trim=TRUE,big.mark=","),")",sep="")
 map.title <- "Nitrogen Oxides Emissions Density in tons/year/mi^2 (# Counties)"
 layout(matrix(c(1,2),2,1),widths=1,heights=c(1,0.1))
+par(mar=c(0,0,0,0),bg="gray95")
 draw.map("state",proj.args=pa)
 for (i in 1:nrow(county.data)) {
   draw.map("county",county.data$fips[i],add=TRUE,proj.args=pa,col=county.data$color[i],lwd=0.5)
 }
 draw.map("state",proj.args=pa,add=TRUE)
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("top",legend=map.legend,ncol=5,fill=map.colors,title=map.title,bty='n',cex=0.75)
+legend("top",legend=map.legend,ncol=6,fill=map.colors,title=map.title,bty='n',cex=0.75)
 ```
 **Figure 2.**	U.S. county-level NO~X~ emissions density estimates in tons/year/mi^2^. **Source:** [`r params$nei.year` NEI](https://www.epa.gov/air-emissions-inventories/`r params$nei.year`-national-emissions-inventory-nei-data)
+
+\newpage
 
 |      Figure 3 below shows the national trend in U.S. anthropogenic NO~X~ emissions from 2002 to `r params$curr.year`.[^1] Nationwide estimates indicate a `r pct.chg`% decrease in anthropogenic NO~X~ emissions from 2002 to `r params$curr.year` as a result of multiple regulatory programs implemented over the past two decades, including the NO~X~ SIP Call, the Cross-State Air Pollution Rule (CSAPR), and the Tier 3 Light-duty Vehicle Emissions and Fuel Standards. The overall decrease in NO~X~ emissions has been driven primarily by decreases from the three largest emissions sectors. Specifically, compared to the 2002 NEI, estimates for `r params$curr.year` indicate a `r pct.chg.hwy`% reduction in NO~X~ emissions from highway vehicles, a `r pct.chg.nrd`% reduction in NO~X~ emissions from non-road mobile sources, and a `r pct.chg.sfc`% reduction in NO~X~ emissions from stationary fuel combustion.
 
@@ -123,7 +127,7 @@ df <- trends.data$NOx[match(source.cat,trends.data$NOx$source),
 df2 <- apply(df[c(nrow(df):1),-1],2,cumsum)
 source.labels <- c("Highway Vehicles","Non-Road Mobile","Stationary Fuel Combustion",
   "Industrial and Other Processes","Other Anthropogenic Sources")
-par(mar=c(4,4,1,1),mgp=c(3,0.75,0),las=2,cex.axis=0.75,cex.lab=0.75)
+par(mar=c(4,4,0.5,0.5),mgp=c(3,0.75,0),las=2,cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xaxs='i',xlim=c(2002,curr.year),
   xlab="Inventory Year",yaxs='i',ylim=c(0,26000),ylab="NOx Emissions (kTons/year)")
 axis(side=1,at=seq(2002,curr.year,3),labels=seq(2002,curr.year,3))
@@ -141,6 +145,7 @@ legend("topright",legend=source.labels,fill=rev(trend.colors),
   border=rev(trend.border),cex=0.75,bty='n')
 box()
 ```
+\vspace{-5truemm}
 **Figure 3.**	U.S. anthropogenic NO~X~ emissions trend, 2002-`r params$curr.year`. **Source:** [EPA’s Air Pollutant Emissions Trends Data ](https://www.epa.gov/air-emissions-inventories/air-pollutant-emissions-trends-data)
 
 ## 4. Ambient Air Monitoring Requirements and Monitoring Networks
@@ -159,28 +164,30 @@ no2.sites <- subset(no2.monitors,!duplicated(substr(id,1,9)))
 |      Finally, there are also a number of Special Purpose Monitors (SPMs), which are not required but are often operated by air agencies for short periods of time (i.e., less than 3 years) to collect data for human health and welfare studies, as well as other types of monitoring sites, including monitors operated by tribes and industrial sources. The SPMs are typically not used to assess compliance with the NAAQS.
 
 ```{r label="Figure04-monitor-map",fig.height=5}
-colors <- c("gray50","blue3","yellow3","red3")
+colors <- c("gray50","blue3","yellow3","red3","black")
 no2.monitors$site <- substr(no2.monitors$id,1,9)
 no2.monitors$class <- mapply(function(type,network) ifelse(network == "NEAR ROAD","NEAR ROAD",
   ifelse(network %in% c("NCORE","PROPOSED NCORE","PAMS","UNOFFICIAL PAMS"),"NCORE/PAMS",
-  ifelse(type == "SLAMS","SLAMS","SPM/OTHER"))),no2.monitors$monitor_type,no2.monitors$network)
-t <- ddply(no2.monitors,"site",summarize,latitude=as.numeric(latitude[1]),
-  longitude=as.numeric(longitude[1]),class=min(class))
+  ifelse(type == "SLAMS","SLAMS",ifelse(type == "TRIBAL","TRIBAL","SPM/OTHER")))),
+  no2.monitors$monitor_type,no2.monitors$network)
+t <- ddply(no2.monitors,"site",summarize,latitude=latitude[1],longitude=longitude[1],class=min(class))
 t$color <- sapply(substr(t$class,1,2),function(x) switch(x,
-  NE=colors[3],NC=colors[2],SL=colors[1],colors[4]))
+  NE=colors[3],NC=colors[2],SL=colors[1],TR=colors[5],colors[4]))
+t$pch <- sapply(substr(t$class,1,2),function(x) switch(x,NE=23,NC=22,SL=21,TR=25,24))
 t <- t[order(t$class,t$site,decreasing=TRUE),]
-N <- table(t$class)[c(3,1,2,4)]
+N <- table(t$class)[c(3,1,2,4,5)]
 legend.lab <- paste(names(N)," (",N,")",sep="")
 
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="grey95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 for (i in 1:nrow(t)) {
   add.layer(type="points",x=t$longitude[i],y=t$latitude[i],
-    proj.args=pa,bg=t$color[i],pch=21)
+    proj.args=pa,bg=t$color[i],pch=t$pch[i])
 }
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
-legend("bottom",legend=legend.lab,pt.bg=colors,pch=21,cex=0.75,
-  pt.cex=1.25,bty='n',ncol=4,title="Monitoring Network (# sites)",)
+legend("bottom",legend=legend.lab,pt.bg=colors,pch=c(21:25),cex=0.75,
+  pt.cex=1.25,bty='n',ncol=5,title="Monitoring Network (# sites)",)
 ```
 **Figure 4:** Map of U.S. NO~2~ monitoring sites reporting data to the EPA during the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
 
@@ -252,19 +259,21 @@ N.sites = number of sites; N.obs = number of observations; SD = standard deviati
 dvs.no2.ann <- subset(no2.dvs,year == curr.year & !is.na(dv_ann) & valid_ann == "Y",
   c("site","latitude","longitude","year","dv_ann"))
 vals <- round(dvs.no2.ann$dv_ann); o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(11,21,31,54); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(11,21,54,81,121); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ppb (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.no2.ann$longitude[o],y=dvs.no2.ann$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.lab[keep],pch=21,col="black",
-  pt.bg=colors[keep],cex=0.75,pt.cex=1.25,bty='n',ncol=4)
+  pt.bg=colors[keep],cex=0.75,pt.cex=1.25,bty='n',ncol=3)
 ```
 **Figure 5:** Annual NO~2~ design values in ppb based on data from `r params$curr.year`. **Source:** [AQS](https://www.epa.gov/aqs).
 
@@ -272,19 +281,21 @@ legend("bottom",legend=legend.lab[keep],pch=21,col="black",
 dvs.no2.1hr <- subset(no2.dvs,year == curr.year & valid_1hr == "Y",
   c("site","latitude","longitude","year","dv_1hr"))
 vals <- dvs.no2.1hr$dv_1hr; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(26,51,76,101); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(31,61,101,151,251);
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ppb (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.no2.1hr$longitude[o],y=dvs.no2.1hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o])
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.lab[keep],pch=21,col="black",
-  pt.bg=colors[keep],cex=0.75,pt.cex=1.25,bty='n',ncol=4)
+  pt.bg=colors[keep],cex=0.75,pt.cex=1.25,bty='n',ncol=3)
 ```
 **Figure 6:** 1-hour NO~2~ design values in ppb for the `r params$curr.year-2`-`r params$curr.year` period. **Source:** [AQS](https://www.epa.gov/aqs).
 
@@ -303,10 +314,10 @@ pt.cex <- c(1.25,1,0.75,1,1.25); pt.pch <- c(25,25,21,24,24);
 ind <- as.integer(names(table(cat))); r <- order(abs(no2.site.dvs.ann$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=no2.site.dvs.ann$longitude[r],y=no2.site.dvs.ann$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',col="black",cex=0.75,
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -324,10 +335,10 @@ pt.cex <- c(1.25,1,0.75,1,1.25); pt.pch <- c(25,25,21,24,24);
 ind <- as.integer(names(table(cat))); r <- order(abs(no2.site.dvs.1hr$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=no2.site.dvs.1hr$longitude[r],y=no2.site.dvs.1hr$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',col="black",cex=0.75,
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -349,7 +360,7 @@ pct.change.1hr <- round(100*(median.1hr.past-median.1hr.curr)/median.1hr.past)
 ```{r label="Figure09-national-trend",fig.height=5}
 no2.trend.dvs.1hr <- apply(no2.site.dvs.1hr[,-c(1:3)],2,quantile,probs=c(0.1,0.5,0.9),na.rm=TRUE)
 no2.trend.dvs.ann <- apply(no2.site.dvs.ann[,-c(1:3)],2,quantile,probs=c(0.1,0.5,0.9),na.rm=TRUE)
-par(mar=c(3,3,1,1),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,0.5),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(0,100),ylab="NO2 Design Value (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -366,16 +377,17 @@ legend("topright",legend=c("10th/90th Percentile 1-hour DV","Median 1-hour DV",
   "10th/90th Percentile Annual DV","Median Annual DV","NO2 Annual NAAQS Level"),
   lty=c(2,1,2,1,2),lwd=1.5,col=c(rep("orange3",2),rep("steelblue",2),"black"),cex=0.75,bty='n')
 ```
+\vspace{-5truemm}
 **Figure 9:** National trends in NO~2~ design values in ppb, 2000 to `r params$curr.year`. **Source:** [AQS](https://www.epa.gov/aqs).
 
 \newpage
 
-|      Figure 10 below shows the national distribution of the annual 98th percentile MDA1 NO~2~ concentrations reported in each year from 1980 to `r params$curr.year`, while Figure 11 shows the national distribution of the annual mean NO~2~ concentrations reported to EPA during the same period.[^6] The red line shows the number of sites included in the boxplot for each year. These figures show that NO~2~ concentrations have decreased steadily over the past 40 years as older cars were replaced with newer models with lower NO~X~ emissions, and power plants and other industrial sources have added emissions controls and transitioned to cleaner burning fuels. The median 98th percentile MDA1 NO~2~ concentration decreased by `r pct.chg.1hr`%, from `r round(median.1hr.yr1,1)` ppb in 1980 to `r round(median.1hr.yr2,1)` ppb in `r params$curr.year`. Similarly, the median annual mean NO~2~ concentration decreased by `r pct.chg.ann`%, from `r round(median.ann.yr1,1)` ppb in 1980 to `r round(median.ann.yr2,1)` ppb in `r params$curr.year`. No sites have reported annual 98th percentile MDA1 NO~2~ concentrations that would have exceeded the level of the 1-hour NO~2~ NAAQS since 2008, and no sites have reported annual mean NO~2~ concentrations that exceeded the level of the annual NO~2~ NAAQS since 1991. The size of the NO~2~ monitoring network increased from 1980 through the early 2000s, decreased slightly between 2002 and 2011, then increased again over the next few years as the near-road network was implemented. Over the past decade, annual mean and 98th percentile MDA1 NO~2~ concentrations have been relatively constant at levels well below the NAAQS. This is likely due to higher concentrations measured at near-road sites offsetting continued reductions in NO~2~ concentrations associated with reductions in NO~X~ emissions (see Figure 2).
+|      Figure 10 below shows the national distribution of the annual 98th percentile MDA1 NO~2~ concentrations reported in each year from 1980 to `r params$curr.year`, while Figure 11 shows the national distribution of the annual mean NO~2~ concentrations reported to EPA during the same period.[^6] The red line shows the number of sites included in the boxplot for each year. These figures show that NO~2~ concentrations have decreased steadily over the past 40 years as older cars were replaced with newer models with lower NO~X~ emissions, and power plants and other industrial sources have added emissions controls and transitioned to cleaner burning fuels. The median 98th percentile MDA1 NO~2~ concentration decreased by `r pct.chg.1hr`%, from `r round(median.1hr.yr1,1)` ppb in 1980 to `r round(median.1hr.yr2,1)` ppb in `r params$curr.year`. Similarly, the median annual mean NO~2~ concentration decreased by `r pct.chg.ann`%, from `r round(median.ann.yr1,1)` ppb in 1980 to `r round(median.ann.yr2,1)` ppb in `r params$curr.year`. Other than one site where the 2023 data quality is still being assessed, no sites have reported annual 98th percentile MDA1 NO~2~ concentrations that would have exceeded the level of the 1-hour NO~2~ NAAQS since 2008, and no sites have reported annual mean NO~2~ concentrations that exceeded the level of the annual NO~2~ NAAQS since 1991. The size of the NO~2~ monitoring network increased from 1980 through the early 2000s, decreased slightly between 2002 and 2011, then increased again over the next few years as the near-road network was implemented. Over the past decade, annual mean and 98th percentile MDA1 NO~2~ concentrations have been relatively constant at levels well below the NAAQS. This is likely due to higher concentrations measured at near-road sites offsetting continued reductions in NO~2~ concentrations associated with reductions in NO~X~ emissions (see Figure 2).
 
 ```{r label="Figure10-conc-boxplots-1hr",fig.height=5}
 no2.stats <- tapply(pmin(no2.annual$conc.1hr,300),list(no2.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(no2.annual$year); years <- c(1980:curr.year);
-par(mar=c(3,3,1,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,300),ylab="Annual 98th Percentile Daily Max 1-hour NO2 Concentration (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -399,7 +411,7 @@ legend("topright",legend=c("Number of NO2 Sites","1-hour NO2 NAAQS Level"),
 ```{r label="Figure11-conc-boxplots-ann",fig.height=5}
 no2.stats <- tapply(no2.annual$conc.ann,list(no2.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(no2.annual$year); years <- c(1980:curr.year);
-par(mar=c(3,3,1,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75)
+par(mar=c(2.5,3,0.5,3),mgp=c(2,0.75,0),cex.axis=0.75,cex.lab=0.75,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,70),ylab="Annual Mean NO2 Concentration (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)

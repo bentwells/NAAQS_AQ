@@ -13,16 +13,18 @@ load(paste("NAAQS_AQ/data/",curr.year,"/COdvs2000_",curr.year,".Rdata",sep=""))
 dvs.co.1hr <- ddply(subset(co.dvs,year == curr.year & !is.na(dv_1hr)),c("site"),summarize,
   latitude=latitude[1],longitude=longitude[1],year=year[1],dv_1hr=max(dv_1hr))
 vals <- dvs.co.1hr$dv_1hr; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(5.1,10.1,20.1,35.1); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(5.1,15.1,35.1,50.1,100.1); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-0.1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-0.1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(sprintf("%4.1f",bin.min)," - ",bin.max," ppm (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/COdvmap1hr",curr.year-1,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.co.1hr$longitude[o],y=dvs.co.1hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -33,16 +35,18 @@ dev.off()
 dvs.co.8hr <- ddply(subset(co.dvs,year == curr.year & !is.na(dv_8hr)),c("site"),summarize,
   latitude=latitude[1],longitude=longitude[1],year=year[1],dv_8hr=max(dv_8hr))
 vals <- dvs.co.8hr$dv_8hr; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(3.1,6.1,9.1,15.1); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(3.1,6.1,9.1,12.1,20.1); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-0.1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-0.1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(sprintf("%4.1f",bin.min)," - ",bin.max," ppm (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/COdvmap8hr",curr.year-1,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.co.8hr$longitude[o],y=dvs.co.8hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -55,36 +59,40 @@ load(paste("NAAQS_AQ/data/",curr.year,"/NO2dvs2000_",curr.year,".Rdata",sep=""))
 dvs.no2.1hr <- subset(no2.dvs,year == curr.year & valid_1hr == "Y",
   c("site","latitude","longitude","year","dv_1hr"))
 vals <- dvs.no2.1hr$dv_1hr; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(26,51,76,101); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(31,61,101,151,251); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ppb (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/NO2dvmap1hr",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.no2.1hr$longitude[o],y=dvs.no2.1hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.lab[keep],bty='n',cex=2,
-  pch=21,col="black",pt.bg=colors[keep],pt.cex=3,ncol=4)
+  pch=21,col="black",pt.bg=colors[keep],pt.cex=3,ncol=3)
 dev.off()
 
 dvs.no2.ann <- subset(no2.dvs,year == curr.year & !is.na(dv_ann) & valid_ann == "Y",
   c("site","latitude","longitude","year","dv_ann"))
 vals <- round(dvs.no2.ann$dv_ann); o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(11,21,31,54); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(11,21,54,81,121); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ppb (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/NO2dvmapann",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.no2.ann$longitude[o],y=dvs.no2.ann$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -97,16 +105,18 @@ load(paste("NAAQS_AQ/data/",curr.year,"/O3dvs2000_",curr.year,".Rdata",sep=""))
 dvs.o3.8hr <- subset(o3.dvs,year == curr.year & valid_8hr == "Y",
   c("site","latitude","longitude","year","dv_8hr"))
 vals <- dvs.o3.8hr$dv_8hr; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3","purple3"); bins <- c(61,66,71,76,85); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(61,66,71,76,85); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ppb (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/O3dvmap",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.o3.8hr$longitude[o],y=dvs.o3.8hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -119,16 +129,18 @@ load(paste("NAAQS_AQ/data/",curr.year,"/PBdvs2010_",curr.year,".Rdata",sep=""))
 dvs.pb.3mo <- subset(pb.dvs,year == curr.year & valid_dv == "Y",
   c("site","latitude","longitude","year","dv"))
 vals <- dvs.pb.3mo$dv; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(0.06,0.11,0.16,0.21); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(0.06,0.11,0.16,0.26,0.51); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-0.01,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-0.01,Inf))); keep <- which(N > 0);
-legend.lab <- paste(sprintf("%5.2f",bin.min)," - ",sprintf("%5.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.2f",bin.min)," - ",sprintf("%4.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/Pbdvmap",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.pb.3mo$longitude[o],y=dvs.pb.3mo$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -141,16 +153,18 @@ load(paste("NAAQS_AQ/data/",curr.year,"/PM10dvs2000_",curr.year,".Rdata",sep="")
 dvs.pm10.24hr <- subset(pm10.dvs,year == curr.year & dv_valid == "Y",
   c("site","latitude","longitude","year","dv_conc"))
 vals <- dvs.pm10.24hr$dv_conc; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3","purple3"); bins <- c(51,101,151,201,501); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(51,101,151,201,501); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/PM10dvmap",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.pm10.24hr$longitude[o],y=dvs.pm10.24hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -163,16 +177,18 @@ load(paste("NAAQS_AQ/data/",curr.year,"/PM25dvs2002_",curr.year,".Rdata",sep="")
 dvs.pm25.24hr <- subset(pm25.dvs,year == curr.year & dv_24h_valid == "Y",
   c("site","latitude","longitude","year","dv_24h"))
 vals <- dvs.pm25.24hr$dv_24h; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3","purple3"); bins <- c(16,26,36,51,101); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(16,26,36,51,101); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/PM25dvmap24h",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.pm25.24hr$longitude[o],y=dvs.pm25.24hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -183,16 +199,18 @@ dev.off()
 dvs.pm25.ann <- subset(pm25.dvs,year == curr.year & dv_ann_valid == "Y",
   c("site","latitude","longitude","year","dv_ann"))
 vals <- dvs.pm25.ann$dv_ann; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3","purple3"); bins <- c(5.1,7.1,9.1,12.1,15.1); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(5.1,7.1,9.1,12.1,15.1); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-0.1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-0.1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",sprintf("%4.1f",bin.max)," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/PM25dvmapann",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.pm25.ann$longitude[o],y=dvs.pm25.ann$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -205,16 +223,18 @@ load(paste("NAAQS_AQ/data/",curr.year,"/SO2dvs2000_",curr.year,".Rdata",sep=""))
 dvs.so2.1hr <- subset(so2.dvs,year == curr.year & dv_valid == "Y",
   c("site","latitude","longitude","year","dv"))
 vals <- dvs.so2.1hr$dv; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3","purple3"); bins <- c(26,51,76,101,251); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(26,51,76,101,251); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
 bin.min <- c(min(vals),bins); bin.max <- c(bins-1,max(vals));
 N <- table(cut(vals,breaks=c(0,bins-1,Inf))); keep <- which(N > 0);
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
 legend.lab <- paste(bin.min," - ",bin.max," ppb (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/SO2dvmap",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=dvs.so2.1hr$longitude[o],y=dvs.so2.1hr$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -236,16 +256,18 @@ pm25.spec.sites <- subset(pm25.spec.monitors,!duplicated(site),c("site","latitud
 t <- subset(ddply(pm10_25,c("site","year"),summarize,pm10_25=max.na(pm10_25)),year >= curr.year-2)
 map.vals <- merge(pm10_25.sites,ddply(t,c("site"),summarize,pm10_25=mean(pm10_25)))
 vals <- map.vals$pm10_25; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(2,4,6,10); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(3.1,6.1,10.1,20.1,50.1); 
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
-bin.min <- c(0,bins); bin.max <- c(bins-0.1,round(max(vals)));
+bin.min <- c(round(min(vals),1),bins); bin.max <- c(bins-0.1,round(max(vals),1));
 N <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(N > 0);
-legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",N," sites)",sep="")
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.1f",bin.min)," - ",sprintf("%4.1f",bin.max)," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/PM10_25avgmap",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=map.vals$longitude[o],y=map.vals$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -257,16 +279,18 @@ dev.off()
 t <- subset(ddply(pm25.spec,c("site","year"),summarize,so4=max.na(so4)),year >= curr.year-2)
 map.vals <- na.omit(merge(pm25.spec.sites,ddply(t,c("site"),summarize,so4=mean(so4))))
 vals <- map.vals$so4; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(0.5,1,1.5,2); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(0.51,1.01,1.51,2.01,3.01);
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
-bin.min <- c(0,bins); bin.max <- c(bins-0.01,round(max(vals),2));
+bin.min <- c(round(min(vals),2),bins); bin.max <- c(bins-0.01,round(max(vals),2));
 N <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(N > 0);
-legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",N," sites)",sep="")
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.2f",bin.min)," - ",sprintf("%4.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/PM25_SO4avgmap",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=map.vals$longitude[o],y=map.vals$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -278,16 +302,18 @@ dev.off()
 t <- subset(ddply(pm25.spec,c("site","year"),summarize,no3=max.na(no3)),year >= curr.year-2)
 map.vals <- na.omit(merge(pm25.spec.sites,ddply(t,c("site"),summarize,no3=mean(no3))))
 vals <- map.vals$no3; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(0.5,1,1.5,2); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(0.51,1.01,1.51,2.01,3.01);
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
-bin.min <- c(0,bins); bin.max <- c(bins-0.01,round(max(vals),2));
+bin.min <- c(round(min(vals),2),bins); bin.max <- c(bins-0.01,round(max(vals),2));
 N <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(N > 0);
-legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",N," sites)",sep="")
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.2f",bin.min)," - ",sprintf("%4.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/PM25_NO3avgmap",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=map.vals$longitude[o],y=map.vals$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -299,16 +325,18 @@ dev.off()
 t <- subset(ddply(pm25.spec,c("site","year"),summarize,ec=max.na(ec)),year >= curr.year-2)
 map.vals <- na.omit(merge(pm25.spec.sites,ddply(t,c("site"),summarize,ec=mean(ec))))
 vals <- map.vals$ec; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(0.25,0.5,0.75,1); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(0.26,0.51,0.76,1.01,1.51);
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
-bin.min <- c(0,bins); bin.max <- c(bins-0.01,round(max(vals),2));
+bin.min <- c(round(min(vals),2),bins); bin.max <- c(bins-0.01,round(max(vals),2));
 N <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(N > 0);
-legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",N," sites)",sep="")
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.2f",bin.min)," - ",sprintf("%4.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/PM25_ECavgmap",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=map.vals$longitude[o],y=map.vals$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
@@ -320,16 +348,18 @@ dev.off()
 t <- subset(ddply(pm25.spec,c("site","year"),summarize,oc=max.na(oc)),year >= curr.year-2)
 map.vals <- na.omit(merge(pm25.spec.sites,ddply(t,c("site"),summarize,oc=mean(oc))))
 vals <- map.vals$oc; o <- order(vals);
-colors <- c("blue3","cyan3","yellow3","orange3","red3"); bins <- c(1,2,3,4); 
+colors <- c("blue3","cyan3","yellow3","orange3","red3","magenta3"); bins <- c(1.01,2.01,3.01,4.01,6.01);
 pt.col <- assign.colors(vals,discrete=TRUE,breaks=bins,palette=colors)
-bin.min <- c(0,bins); bin.max <- c(bins-0.01,round(max(vals),2));
+bin.min <- c(round(min(vals),2),bins); bin.max <- c(bins-0.01,round(max(vals),2));
 N <- table(cut(vals,breaks=c(0,bins,Inf))); keep <- which(N > 0);
-legend.lab <- paste(bin.min," - ",bin.max," ug/m^3 (",N," sites)",sep="")
+if (length(keep) <= length(bins)) { bin.max[keep[length(keep)]] <- max(vals) }
+legend.lab <- paste(sprintf("%4.2f",bin.min)," - ",sprintf("%4.2f",bin.max)," ug/m^3 (",N," sites)",sep="")
 if (any(N == 1)) { legend.lab[which(N == 1)] <- gsub("sites","site",legend.lab[which(N == 1)]) }
 file.name <- paste("NAAQS_AQ/dv_maps/",curr.year,"/PM25_OCavgmap",curr.year-2,"_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=map.vals$longitude[o],y=map.vals$latitude[o],
   proj.args=pa,pch=21,col="black",bg=pt.col[o],cex=3)
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))

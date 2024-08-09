@@ -610,8 +610,7 @@ cat("Done.",as.character(round(Sys.time())),"\n")
 ## AQS annual summary data retrieval for coarse PM and PM2.5 species
 ####################################################################
 cat("Retrieving annual coarse PM and PM2.5 species values... ")
-annual.cols <- unlist(get.aqs.data("SELECT column_name FROM sys.all_tab_columns
-  WHERE table_name = 'ANNUAL_SUMMARIES'"))
+## annual.cols <- unlist(get.aqs.data("SELECT column_name FROM sys.all_tab_columns WHERE table_name = 'ANNUAL_SUMMARIES'"))
 get.annual.data <- function(par,name,years) {
   ny <- length(years)
   vals <- get.aqs.data(paste("

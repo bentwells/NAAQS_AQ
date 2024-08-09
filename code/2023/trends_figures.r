@@ -42,9 +42,9 @@ save(list=c("co.site.dvs.1hr","co.site.dvs.8hr"),
   file=paste("NAAQS_AQ/data/",curr.year,"/COtrends2000_",curr.year,".Rdata",sep=""))
 
 ## National CO DV trends figure
-file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/COdvtrends2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/COtrendchart2000_",curr.year,".png",sep="")
 png(file=file.name,width=800,height=600)
-par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(0,15),ylab="CO Design Value (ppm)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -66,9 +66,9 @@ box(); dev.off();
 load(paste("NAAQS_AQ/data/",curr.year,"/COannual1980_",curr.year,".Rdata",sep=""))
 co.stats <- tapply(co.annual$conc.1hr,list(co.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(co.annual$year); years <- c(1980:curr.year);
-file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/COannual1hr1980_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/COboxplots1hr1980_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
-par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,50),ylab="Annual 2nd Highest 1-hour CO Concentration (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -89,9 +89,9 @@ box(); dev.off();
 ## Boxplots of annual 2nd max 8-hr CO values
 co.stats <- tapply(co.annual$conc.8hr,list(co.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(co.annual$year); years <- c(1980:curr.year);
-file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/COannual8hr1980_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/COboxplots8hr1980_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
-par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,30),ylab="Annual 2nd Highest 8-hour CO Concentration (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -110,7 +110,7 @@ legend("topright",legend=c("Number of CO Sites","CO NAAQS Level"),
 box(); dev.off();
 
 ## Map of CO 1-hour site-level DV trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/COdvtrends1hr2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/COtrendmap1hr2000_",curr.year,".png",sep="")
 txt <- c("Decreasing > 0.2 ppm/yr","Decreasing < 0.2 ppm/yr","No Significant Trend",
   "Increasing < 0.2 ppm/yr","Increasing > 0.2 ppm/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -120,17 +120,17 @@ ind <- as.integer(names(table(cat))); r <- order(abs(co.site.dvs.1hr$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=co.site.dvs.1hr$longitude[r],y=co.site.dvs.1hr$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
 dev.off()
 
 ## Map of CO 8-hour site-level DV trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/COdvtrends8hr2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/COtrendmap8hr2000_",curr.year,".png",sep="")
 txt <- c("Decreasing > 0.1 ppm/yr","Decreasing < 0.1 ppm/yr","No Significant Trend",
   "Increasing < 0.1 ppm/yr","Increasing > 0.1 ppm/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -140,10 +140,10 @@ ind <- as.integer(names(table(cat))); r <- order(abs(co.site.dvs.8hr$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=co.site.dvs.8hr$longitude[r],y=co.site.dvs.8hr$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -176,9 +176,9 @@ save(list=c("no2.site.dvs.1hr","no2.site.dvs.ann"),
   file=paste("NAAQS_AQ/data/",curr.year,"/NO2trends2000_",curr.year,".Rdata",sep=""))
 
 ## National NO2 DV trends figure
-file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/NO2dvtrends2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/NO2trendchart2000_",curr.year,".png",sep="")
 png(file=file.name,width=800,height=600)
-par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(0,100),ylab="NO2 Design Value (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -200,9 +200,9 @@ box(); dev.off();
 load(paste("NAAQS_AQ/data/",curr.year,"/NO2annual1980_",curr.year,".Rdata",sep=""))
 no2.stats <- tapply(pmin(no2.annual$conc.1hr,300),list(no2.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(no2.annual$year); years <- c(1980:curr.year);
-file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/NO2annual1hr1980_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/NO2boxplots1hr1980_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
-par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,300),ylab="Annual 98th Percentile Daily Max 1-hour NO2 Concentration (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -223,9 +223,9 @@ box(); dev.off();
 ## Boxplots of annual mean NO2 values
 no2.stats <- tapply(no2.annual$conc.ann,list(no2.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(no2.annual$year); years <- c(1980:curr.year);
-file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/NO2annualmean1980_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/NO2boxplotsmean1980_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
-par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,70),ylab="Annual Mean NO2 Concentration (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -244,7 +244,7 @@ legend("topright",legend=c("Number of NO2 Sites","NO2 NAAQS Level"),
 box(); dev.off();
 
 ## Map of NO2 1-hour site-level DV trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/NO2dvtrends1hr2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/NO2trendmap1hr2000_",curr.year,".png",sep="")
 txt <- c("Decreasing > 1 ppb/yr","Decreasing < 1 ppb/yr","No Significant Trend",
   "Increasing < 1 ppb/yr","Increasing > 1 ppb/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -254,17 +254,17 @@ ind <- as.integer(names(table(cat))); r <- order(abs(no2.site.dvs.1hr$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=no2.site.dvs.1hr$longitude[r],y=no2.site.dvs.1hr$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
 dev.off()
 
 ## Map of NO2 Annual site-level DV trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/NO2dvtrendsann2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/NO2trendmapann2000_",curr.year,".png",sep="")
 txt <- c("Decreasing > 0.5 ppb/yr","Decreasing < 0.5 ppb/yr","No Significant Trend",
   "Increasing < 0.5 ppb/yr","Increasing > 0.5 ppb/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -274,10 +274,10 @@ ind <- as.integer(names(table(cat))); r <- order(abs(no2.site.dvs.ann$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=no2.site.dvs.ann$longitude[r],y=no2.site.dvs.ann$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -302,9 +302,9 @@ save(list=c("o3.site.dvs.8hr"),
   file=paste("NAAQS_AQ/data/",curr.year,"/O3trends2000_",curr.year,".Rdata",sep=""))
 
 ## National O3 DV trends figure
-file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/O3dvtrends2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/O3trendchart2000_",curr.year,".png",sep="")
 png(file=file.name,width=800,height=600)
-par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(50,105),ylab="O3 Design Value (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -322,9 +322,9 @@ box(); dev.off();
 load(paste("NAAQS_AQ/data/",curr.year,"/O3annual1980_",curr.year,".Rdata",sep=""))
 o3.stats <- tapply(pmin(o3.annual$conc,250),list(o3.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(o3.annual$year); years <- c(1980:curr.year);
-file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/O3annual1980_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/O3boxplots1980_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
-par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,250),ylab="Annual 4th Highest Daily Max 8-hour O3 Concentration (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -343,7 +343,7 @@ legend("topright",legend=c("Number of O3 Sites","O3 NAAQS Level"),
 box(); dev.off();
 
 ## Map of O3 8-hour site-level DV trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/O3dvtrends8hr2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/O3trendmap8hr2000_",curr.year,".png",sep="")
 txt <- c("Decreasing > 1 ppb/yr","Decreasing < 1 ppb/yr","No Significant Trend",
   "Increasing < 1 ppb/yr","Increasing > 1 ppb/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -353,10 +353,10 @@ ind <- as.integer(names(table(cat))); r <- order(abs(o3.site.dvs.8hr$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=o3.site.dvs.8hr$longitude[r],y=o3.site.dvs.8hr$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -379,9 +379,9 @@ save(list=c("pb.site.dvs.3mo"),
   file=paste("NAAQS_AQ/data/",curr.year,"/Pbtrends2010_",curr.year,".Rdata",sep=""))
 
 ## National Pb DV trends figure
-file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/Pbdvtrends2010_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/Pbtrendchart2010_",curr.year,".png",sep="")
 png(file=file.name,width=800,height=600)
-par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(2009.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(0,1.1),ylab="Pb Design Value (ug/m^3)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -401,9 +401,9 @@ pb.annual <- subset(pb.annual,N >= 9)
 pb.stats <- tapply(log10(pmax(pb.annual$conc,1e-3)),list(pb.annual$year),
   get.stats,whiskers="pct",wlen=98)
 N <- table(pb.annual$year); years <- c(1980:curr.year);
-file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/Pbannual1980_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/Pbboxplots1980_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
-par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(-3,1.5),ylab="Maximum 3-month Pb Concentration (ug/m^3)",main="")
 yaxs.labs <- c(0.001,0.002,0.005,0.01,0.02,0.05,0.1,0.2,0.5,1,2,5,10,20)
@@ -423,7 +423,7 @@ legend("topright",legend=c("Number of Pb Sites","Pb NAAQS Level"),
 box(); dev.off();
 
 ## Map of Pb site-level DV trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/Pbdvtrends3mo2010_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/Pbtrendmap3mo2010_",curr.year,".png",sep="")
 txt <- c("Decreasing > 0.05 ug/m^3/yr","Decreasing < 0.05 ug/m^3/yr",
   "No Significant Trend","Increasing < 0.05 ug/m^3/yr","Increasing > 0.05 ug/m^3/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -433,7 +433,8 @@ ind <- as.integer(names(table(cat))); r <- order(abs(pb.site.dvs.3mo$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=pb.site.dvs.3mo$longitude[r],y=pb.site.dvs.3mo$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
 par(mar=c(0,0,0,0))
@@ -461,9 +462,9 @@ save(list=c("pm10.site.dvs.24h"),
   file=paste("NAAQS_AQ/data/",curr.year,"/PM10trends2000_",curr.year,".Rdata",sep=""))
 
 ## National PM10 DV trends figure
-file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/PM10dvtrends2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/PM10trendchart2000_",curr.year,".png",sep="")
 png(file=file.name,width=800,height=600)
-par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(0,250),ylab="PM10 Design Concentration (ug/m^3)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -481,9 +482,9 @@ box(); dev.off();
 load(paste("NAAQS_AQ/data/",curr.year,"/PM10annual1990_",curr.year,".Rdata",sep=""))
 pm10.stats <- tapply(log10(pm10.annual$conc),list(pm10.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(pm10.annual$year); years <- c(1990:curr.year);
-file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/PM10annual1990_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/PM10boxplots1990_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
-par(mar=c(4,6,1,5),mgp=c(4.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,6,1,5),mgp=c(4.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1989.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,4),ylab="Annual 2nd Highest 24-hour PM10 Concentration (ug/m^3)",main="")
 yaxs.labs <- c(1,2,5,10,20,50,100,200,500,1000,2000,5000,10000)
@@ -503,7 +504,7 @@ legend("topright",legend=c("Number of PM10 Sites","PM10 NAAQS Level"),
 box(); dev.off();
 
 ## Map of PM10 site-level DV trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM10dvtrends24h2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM10trendmap24h2000_",curr.year,".png",sep="")
 txt <- c("Decreasing > 3 ug/m^3/yr","Decreasing < 3 ug/m^3/yr",
   "No Significant Trend","Increasing < 3 ug/m^3/yr","Increasing > 3 ug/m^3/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -513,10 +514,10 @@ ind <- as.integer(names(table(cat))); r <- order(abs(pm10.site.dvs.24h$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.15))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=pm10.site.dvs.24h$longitude[r],y=pm10.site.dvs.24h$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -547,21 +548,21 @@ save(list=c("pm25.site.dvs.ann","pm25.site.dvs.24h"),
   file=paste("NAAQS_AQ/data/",curr.year,"/PM25trends2002_",curr.year,".Rdata",sep=""))
 
 ## National PM2.5 DV trends figure
-file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/PM25dvtrends2002_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/PM25trendchart2002_",curr.year,".png",sep="")
 png(file=file.name,width=800,height=600)
-par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(2001.5,curr.year+0.5),
-  xlab="",yaxs='i',ylim=c(0,50),ylab="PM2.5 Design Value (ug/m^3)",main="")
+  xlab="",yaxs='i',ylim=c(0,55),ylab="PM2.5 Design Value (ug/m^3)",main="")
 axis(side=1,at=years,labels=years,las=2)
-polygon(x=c(2001.5,rep(curr.year+0.5,2),2001.5),y=c(0,0,50,50),col="gray80")
-abline(h=seq(5,45,5),v=years,col="white")
+polygon(x=c(2001.5,rep(curr.year+0.5,2),2001.5),y=c(0,0,55,55),col="gray80")
+abline(h=seq(5,50,5),v=years,col="white")
 lines(x=years,y=pm25.trend.dvs.ann[1,],lty=2,lwd=2,col="orange3")
 lines(x=years,y=pm25.trend.dvs.ann[2,],lty=1,lwd=2,col="orange3")
 lines(x=years,y=pm25.trend.dvs.ann[3,],lty=2,lwd=2,col="orange3")
 lines(x=years,y=pm25.trend.dvs.24h[1,],lty=2,lwd=2,col="steelblue")
 lines(x=years,y=pm25.trend.dvs.24h[2,],lty=1,lwd=2,col="steelblue")
 lines(x=years,y=pm25.trend.dvs.24h[3,],lty=2,lwd=2,col="steelblue")
-abline(h=c(12,35),lty=2,lwd=2,col="black")
+abline(h=c(9,35),lty=2,lwd=2,col="black")
 legend("topright",legend=c("10th/90th Percentile Annual DV","Median Annual DV",
   "10th/90th Percentile 24-hour DV","Median 24-hour DV","PM2.5 NAAQS Levels"),
   lty=c(2,1,2,1,2),col=c(rep("orange3",2),rep("steelblue",2),"black"),bty='n',lwd=2,cex=1.5)
@@ -571,9 +572,9 @@ box(); dev.off();
 load(paste("NAAQS_AQ/data/",curr.year,"/PM25annual2000_",curr.year,".Rdata",sep=""))
 pm25.stats <- tapply(pm25.annual$conc.24h,list(pm25.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(pm25.annual$year); years <- c(2000:curr.year);
-file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/PM25annual24h2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/PM25boxplots24h2000_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
-par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,250),ylab="Annual 98th Percentile 24-hour PM2.5 Concentration (ug/m^3)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -594,9 +595,9 @@ box(); dev.off();
 ## Boxplots of annual mean PM2.5 values
 pm25.stats <- tapply(pm25.annual$conc.ann,list(pm25.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(pm25.annual$year); years <- c(2000:curr.year);
-file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/PM25annualmean2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/PM25boxplotsmean2000_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
-par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,5,1,5),mgp=c(3.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,50),ylab="Annual Mean PM2.5 Concentration (ug/m^3)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -615,7 +616,7 @@ legend("topright",legend=c("Number of PM2.5 Sites","PM2.5 NAAQS Level"),
 box(); dev.off();
 
 ## Map of PM2.5 Annual site-level DV trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25dvtrendsann2002_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25trendmapann2002_",curr.year,".png",sep="")
 txt <- c("Decreasing > 0.5 ug/m^3/yr","Decreasing < 0.5 ug/m^3/yr",
   "No Significant Trend","Increasing < 0.5 ug/m^3/yr","Increasing > 0.5 ug/m^3/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -625,17 +626,17 @@ ind <- as.integer(names(table(cat))); r <- order(abs(pm25.site.dvs.ann$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=pm25.site.dvs.ann$longitude[r],y=pm25.site.dvs.ann$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
 dev.off()
 
 ## Map of PM2.5 24-hour site-level DV trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25dvtrends24h2002_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25trendmap24h2002_",curr.year,".png",sep="")
 txt <- c("Decreasing > 1 ug/m^3/yr","Decreasing < 1 ug/m^3/yr",
   "No Significant Trend","Increasing < 1 ug/m^3/yr","Increasing > 1 ug/m^3/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -645,10 +646,10 @@ ind <- as.integer(names(table(cat))); r <- order(abs(pm25.site.dvs.24h$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.15))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=pm25.site.dvs.24h$longitude[r],y=pm25.site.dvs.24h$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -672,9 +673,9 @@ save(list=c("so2.site.dvs.1hr"),
   file=paste("NAAQS_AQ/data/",curr.year,"/SO2trends2000_",curr.year,".Rdata",sep=""))
 
 ## National SO2 DV trends figure
-file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/SO2dvtrends2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_charts/",curr.year,"/SO2trendchart2000_",curr.year,".png",sep="")
 png(file=file.name,width=800,height=600)
-par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,4,1,1),mgp=c(2.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1999.5,curr.year+0.5),
   xlab="",yaxs='i',ylim=c(0,200),ylab="SO2 Design Value (ppb)",main="")
 axis(side=1,at=years,labels=years,las=2)
@@ -692,9 +693,9 @@ box(); dev.off();
 load(paste("NAAQS_AQ/data/",curr.year,"/SO2annual1980_",curr.year,".Rdata",sep=""))
 so2.stats <- tapply(pmax(log10(so2.annual$conc),0),list(so2.annual$year),get.stats,whiskers="pct",wlen=98)
 N <- table(so2.annual$year); years <- c(1980:curr.year);
-file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/SO2annual1980_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/conc_boxplots/",curr.year,"/SO2boxplots1980_",curr.year,".png",sep="")
 png(file=file.name,width=1200,height=800)
-par(mar=c(4,6,1,5),mgp=c(4.5,1,0),cex.axis=1.5,cex.lab=1.5)
+par(mar=c(4,6,1,5),mgp=c(4.5,1,0),cex.axis=1.5,cex.lab=1.5,bg="gray95")
 plot(x=NULL,y=NULL,type='n',xaxs='i',xaxt='n',xlim=c(1979.5,curr.year+0.5),xlab="",
   yaxs='i',yaxt='n',ylim=c(0,4),ylab="Annual 99th Percentile Daily Max 1-hour SO2 Concentration (ppb)",main="")
 yaxs.labs <- c(1,2,5,10,20,50,100,200,500,1000,2000,5000,10000)
@@ -716,7 +717,7 @@ legend("topright",legend=c("Number of SO2 Sites","SO2 NAAQS Level","Hawaii Volca
 box(); dev.off();
 
 ## Map of SO2 site-level DV trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/SO2dvtrends1hr2000_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/SO2trendmap1hr2000_",curr.year,".png",sep="")
 txt <- c("Decreasing > 3 ppb/yr","Decreasing < 3 ppb/yr","No Significant Trend",
   "Increasing < 3 ppb/yr","Increasing > 3 ppb/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -726,10 +727,10 @@ ind <- as.integer(names(table(cat))); r <- order(abs(so2.site.dvs.1hr$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.1))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=so2.site.dvs.1hr$longitude[r],y=so2.site.dvs.1hr$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -751,7 +752,7 @@ pm10_25.site.avg$slope <- unlist(lapply(pm10_25.ts,function(x) x$estimates))
 pm10_25.site.avg$pval <- unlist(lapply(pm10_25.ts,function(x) x$p.value))
 
 ## Map of PM10-2.5 site-level annual average trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM10_25trends2005_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM10_25trendmap2005_",curr.year,".png",sep="")
 txt <- c("Decreasing > 0.2 ug/m^3/yr","Decreasing < 0.2 ug/m^3/yr",
   "No Significant Trend","Increasing < 0.2 ug/m^3/yr","Increasing > 0.2 ug/m^3/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -761,10 +762,10 @@ ind <- as.integer(names(table(cat))); r <- order(abs(pm10_25.site.avg$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.15))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=pm10_25.site.avg$longitude[r],y=pm10_25.site.avg$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
@@ -810,7 +811,7 @@ save(list=c("pm10_25.site.avg","so4.site.avg","no3.site.avg","ec.site.avg","oc.s
   file=paste("NAAQS_AQ/data/",curr.year,"/PM25spec_trends",years[1],"_",curr.year,".Rdata",sep=""))
 
 ## Map of SO4 site-level annual average trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25_SO4trends",years[1],"_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25_SO4trendmap",years[1],"_",curr.year,".png",sep="")
 txt <- c("Decreasing > 0.1 ug/m^3/yr","Decreasing < 0.1 ug/m^3/yr",
   "No Significant Trend","Increasing < 0.1 ug/m^3/yr","Increasing > 0.1 ug/m^3/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -820,17 +821,17 @@ ind <- as.integer(names(table(cat))); r <- order(abs(so4.site.avg$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.15))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=so4.site.avg$longitude[r],y=so4.site.avg$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
 dev.off()
 
 ## Map of NO3 site-level annual average trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25_NO3trends",years[1],"_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25_NO3trendmap",years[1],"_",curr.year,".png",sep="")
 txt <- c("Decreasing > 0.1 ug/m^3/yr","Decreasing < 0.1 ug/m^3/yr",
   "No Significant Trend","Increasing < 0.1 ug/m^3/yr","Increasing > 0.1 ug/m^3/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -840,17 +841,17 @@ ind <- as.integer(names(table(cat))); r <- order(abs(no3.site.avg$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.15))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=no3.site.avg$longitude[r],y=no3.site.avg$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
 dev.off()
 
 ## Map of EC site-level annual average trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25_ECtrends",years[1],"_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25_ECtrendmap",years[1],"_",curr.year,".png",sep="")
 txt <- c("Decreasing > 0.1 ug/m^3/yr","Decreasing < 0.1 ug/m^3/yr",
   "No Significant Trend","Increasing < 0.1 ug/m^3/yr","Increasing > 0.1 ug/m^3/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -860,17 +861,17 @@ ind <- as.integer(names(table(cat))); r <- order(abs(ec.site.avg$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.15))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=ec.site.avg$longitude[r],y=ec.site.avg$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
 dev.off()
 
 ## Map of OC site-level annual average trends
-file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25_OCtrends",years[1],"_",curr.year,".png",sep="")
+file.name <- paste("NAAQS_AQ/trend_maps/",curr.year,"/PM25_OCtrendmap",years[1],"_",curr.year,".png",sep="")
 txt <- c("Decreasing > 0.1 ug/m^3/yr","Decreasing < 0.1 ug/m^3/yr",
   "No Significant Trend","Increasing < 0.1 ug/m^3/yr","Increasing > 0.1 ug/m^3/yr")
 cat <- mapply(function(pval,slope) ifelse(pval > 0.05,3,
@@ -880,10 +881,10 @@ ind <- as.integer(names(table(cat))); r <- order(abs(oc.site.avg$slope));
 legend.txt <- paste(txt[ind]," (",table(cat)," sites)",sep="")
 png(file=file.name,width=1200,height=800)
 layout(mat=matrix(c(1,2),2,1),width=1,height=c(1,0.15))
-draw.map("state",proj.args=pa,hires=TRUE,col="gray95")
+par(mar=c(0,0,0,0),bg="gray95")
+draw.map("state",proj.args=pa,hires=TRUE,col="ivory2")
 add.layer(type="points",x=oc.site.avg$longitude[r],y=oc.site.avg$latitude[r],
   proj.args=pa,pch=pt.pch[cat][r],col="black",bg=pt.col[cat][r],cex=pt.cex[cat][r])
-par(mar=c(0,0,0,0))
 plot(x=NULL,y=NULL,type='n',axes=FALSE,xlim=c(0,1),ylim=c(0,1))
 legend("bottom",legend=legend.txt,bty='n',cex=2,col="black",
   pch=pt.pch[ind],pt.bg=pt.col[ind],pt.cex=pt.cex[ind],ncol=2)
